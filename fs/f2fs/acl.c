@@ -402,3 +402,121 @@ int f2fs_init_acl(struct inode *inode, struct inode *dir, struct page *ipage,
 
 	return error;
 }
+
+int f2fs_acl_chmod(struct inode *inode)
+{
+	struct f2fs_sb_info *sbi = F2FS_SB(inode->i_sb);
+	struct posix_acl *acl;
+	int error;
+	umode_t mode = get_inode_mode(inode);
+
+	if (!test_opt(sbi, POSIX_ACL))
+		return 0;
+	if (S_ISLNK(mode))
+		return -EOPNOTSUPP;
+
+	acl = f2fs_get_acl(inode, ACL_TYPE_ACCESS);
+	if (IS_ERR(acl) || !acl)
+		return PTR_ERR(acl);
+
+	error = posix_acl_chmod(&acl, GFP_KERNEL, mode);
+	if (error)
+		return error;
+
+	error = f2fs_set_acl(inode, acl, ACL_TYPE_ACCESS);
+	posix_acl_release(acl);
+	return error;
+}
+
+static size_t f2fs_xattr_list_acl(struct dentry *dentry, char *list,
+		size_t list_size, const char *name, size_t name_len, int type)
+{
+	struct f2fs_sb_info *sbi = F2FS_SB(dentry->d_sb);
+	const char *xname = POSIX_ACL_XATTR_DEFAULT;
+	size_t size;
+
+	if (!test_opt(sbi, POSIX_ACL))
+		return 0;
+
+	if (type == ACL_TYPE_ACCESS)
+		xname = POSIX_ACL_XATTR_ACCESS;
+
+	size = strlen(xname) + 1;
+	if (list && size <= list_size)
+		memcpy(list, xname, size);
+	return size;
+}
+
+static int f2fs_xattr_get_acl(struct dentry *dentry, const char *name,
+		void *buffer, size_t size, int type)
+{
+	struct f2fs_sb_info *sbi = F2FS_SB(dentry->d_sb);
+	struct posix_acl *acl;
+	int error;
+
+	if (strcmp(name, "") != 0)
+		return -EINVAL;
+	if (!test_opt(sbi, POSIX_ACL))
+		return -EOPNOTSUPP;
+
+	acl = f2fs_get_acl(dentry->d_inode, type);
+	if (IS_ERR(acl))
+		return PTR_ERR(acl);
+	if (!acl)
+		return -ENODATA;
+	error = posix_acl_to_xattr(&init_user_ns, acl, buffer, size);
+	posix_acl_release(acl);
+
+	return error;
+}
+
+static int f2fs_xattr_set_acl(struct dentry *dentry, const char *name,
+		const void *value, size_t size, int flags, int type)
+{
+	struct f2fs_sb_info *sbi = F2FS_SB(dentry->d_sb);
+	struct inode *inode = dentry->d_inode;
+	struct posix_acl *acl = NULL;
+	int error;
+
+	if (strcmp(name, "") != 0)
+		return -EINVAL;
+	if (!test_opt(sbi, POSIX_ACL))
+		return -EOPNOTSUPP;
+	if (!inode_owner_or_capable(inode))
+		return -EPERM;
+
+	if (value) {
+		acl = posix_acl_from_xattr(&init_user_ns, value, size);
+		if (IS_ERR(acl))
+			return PTR_ERR(acl);
+		if (acl) {
+			error = posix_acl_valid(acl);
+			if (error)
+				goto release_and_out;
+		}
+	} else {
+		acl = NULL;
+	}
+
+	error = f2fs_set_acl(inode, acl, type);
+
+release_and_out:
+	posix_acl_release(acl);
+	return error;
+}
+
+const struct xattr_handler f2fs_xattr_acl_default_handler = {
+	.prefix = POSIX_ACL_XATTR_DEFAULT,
+	.flags = ACL_TYPE_DEFAULT,
+	.list = f2fs_xattr_list_acl,
+	.get = f2fs_xattr_get_acl,
+	.set = f2fs_xattr_set_acl,
+};
+
+const struct xattr_handler f2fs_xattr_acl_access_handler = {
+	.prefix = POSIX_ACL_XATTR_ACCESS,
+	.flags = ACL_TYPE_ACCESS,
+	.list = f2fs_xattr_list_acl,
+	.get = f2fs_xattr_get_acl,
+	.set = f2fs_xattr_set_acl,
+};

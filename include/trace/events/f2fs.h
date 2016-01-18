@@ -9,41 +9,6 @@
 #define show_dev(entry)		MAJOR(entry->dev), MINOR(entry->dev)
 #define show_dev_ino(entry)	show_dev(entry), (unsigned long)entry->ino
 
-TRACE_DEFINE_ENUM(NODE);
-TRACE_DEFINE_ENUM(DATA);
-TRACE_DEFINE_ENUM(META);
-TRACE_DEFINE_ENUM(META_FLUSH);
-TRACE_DEFINE_ENUM(INMEM);
-TRACE_DEFINE_ENUM(INMEM_DROP);
-TRACE_DEFINE_ENUM(IPU);
-TRACE_DEFINE_ENUM(OPU);
-TRACE_DEFINE_ENUM(CURSEG_HOT_DATA);
-TRACE_DEFINE_ENUM(CURSEG_WARM_DATA);
-TRACE_DEFINE_ENUM(CURSEG_COLD_DATA);
-TRACE_DEFINE_ENUM(CURSEG_HOT_NODE);
-TRACE_DEFINE_ENUM(CURSEG_WARM_NODE);
-TRACE_DEFINE_ENUM(CURSEG_COLD_NODE);
-TRACE_DEFINE_ENUM(NO_CHECK_TYPE);
-TRACE_DEFINE_ENUM(GC_GREEDY);
-TRACE_DEFINE_ENUM(GC_CB);
-TRACE_DEFINE_ENUM(FG_GC);
-TRACE_DEFINE_ENUM(BG_GC);
-TRACE_DEFINE_ENUM(LFS);
-TRACE_DEFINE_ENUM(SSR);
-TRACE_DEFINE_ENUM(__REQ_RAHEAD);
-TRACE_DEFINE_ENUM(__REQ_WRITE);
-TRACE_DEFINE_ENUM(__REQ_SYNC);
-TRACE_DEFINE_ENUM(__REQ_NOIDLE);
-TRACE_DEFINE_ENUM(__REQ_FLUSH);
-TRACE_DEFINE_ENUM(__REQ_FUA);
-TRACE_DEFINE_ENUM(__REQ_PRIO);
-TRACE_DEFINE_ENUM(__REQ_META);
-TRACE_DEFINE_ENUM(CP_UMOUNT);
-TRACE_DEFINE_ENUM(CP_FASTBOOT);
-TRACE_DEFINE_ENUM(CP_SYNC);
-TRACE_DEFINE_ENUM(CP_RECOVERY);
-TRACE_DEFINE_ENUM(CP_DISCARD);
-
 #define show_block_type(type)						\
 	__print_symbolic(type,						\
 		{ NODE,		"NODE" },				\
@@ -787,8 +752,8 @@ DECLARE_EVENT_CLASS(f2fs__submit_bio,
 		__entry->dev		= sb->s_dev;
 		__entry->rw		= fio->rw;
 		__entry->type		= fio->type;
-		__entry->sector		= bio->bi_iter.bi_sector;
-		__entry->size		= bio->bi_iter.bi_size;
+		__entry->sector		= bio->bi_sector;
+		__entry->size		= bio->bi_size;
 	),
 
 	TP_printk("dev = (%d,%d), %s%s, %s, sector = %lld, size = %u",

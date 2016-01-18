@@ -1707,7 +1707,7 @@ bool f2fs_empty_dir(struct inode *);
 
 static inline int f2fs_add_link(struct dentry *dentry, struct inode *inode)
 {
-	return __f2fs_add_link(d_inode(dentry->d_parent), &dentry->d_name,
+	return __f2fs_add_link(dentry->d_parent->d_inode, &dentry->d_name,
 				inode, inode->i_ino, inode->i_mode);
 }
 
@@ -1848,7 +1848,7 @@ struct page *get_lock_data_page(struct inode *, pgoff_t, bool);
 struct page *get_new_data_page(struct inode *, struct page *, pgoff_t, bool);
 int do_write_data_page(struct f2fs_io_info *);
 int f2fs_fiemap(struct inode *inode, struct fiemap_extent_info *, u64, u64);
-void f2fs_invalidate_page(struct page *, unsigned int, unsigned int);
+void f2fs_invalidate_page(struct page *, unsigned long);
 int f2fs_release_page(struct page *, gfp_t);
 
 /*
@@ -2060,8 +2060,8 @@ int f2fs_inline_data_fiemap(struct inode *,
 /*
  * shrinker.c
  */
-unsigned long f2fs_shrink_count(struct shrinker *, struct shrink_control *);
-unsigned long f2fs_shrink_scan(struct shrinker *, struct shrink_control *);
+int f2fs_shrink_count(struct shrinker *, struct shrink_control *);
+int f2fs_shrink_scan(struct shrinker *, struct shrink_control *);
 void f2fs_join_shrinker(struct f2fs_sb_info *);
 void f2fs_leave_shrinker(struct f2fs_sb_info *);
 
