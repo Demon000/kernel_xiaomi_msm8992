@@ -566,6 +566,8 @@ static void f2fs_put_super(struct super_block *sb)
 
 	sb->s_fs_info = NULL;
 	brelse(sbi->raw_super_buf);
+	if (sbi->s_chksum_driver)
+		crypto_free_shash(sbi->s_chksum_driver);
 	kfree(sbi);
 }
 
@@ -1143,6 +1145,15 @@ try_onemore:
 	if (!sbi)
 		return -ENOMEM;
 
+	/* Load the checksum driver */
+	sbi->s_chksum_driver = crypto_alloc_shash("crc32", 0, 0);
+	if (IS_ERR(sbi->s_chksum_driver)) {
+		f2fs_msg(sb, KERN_ERR, "Cannot load crc32 driver.");
+		err = PTR_ERR(sbi->s_chksum_driver);
+		sbi->s_chksum_driver = NULL;
+		goto free_sbi;
+	}
+
 	/* set a block size */
 	if (unlikely(!sb_set_blocksize(sb, F2FS_BLKSIZE))) {
 		f2fs_msg(sb, KERN_ERR, "unable to set blocksize");
@@ -1388,6 +1399,8 @@ free_options:
 free_sb_buf:
 	brelse(raw_super_buf);
 free_sbi:
+	if (sbi->s_chksum_driver)
+		crypto_free_shash(sbi->s_chksum_driver);
 	kfree(sbi);
 
 	/* give only one another chance */
