@@ -50,6 +50,10 @@
 #define ISA1000_VIB_DEFAULT_TIMEOUT	15000
 #define ISA1000_DEFAULT_PWM_FREQ	30000
 
+#define LEVEL_DEFAULT	77
+#define LEVEL_MIN		0
+#define LEVEL_MAX		128
+
 static const unsigned int pwm_period_ns = NSEC_PER_SEC / ISA1000_DEFAULT_PWM_FREQ;
 
 struct isa1000_pwm_info {
@@ -71,6 +75,7 @@ struct isa1000_vib {
 	int enable_gpio;
 	int timeout;
 	int state;
+	int level;
 	struct mutex lock;
 } ;
 
@@ -81,9 +86,16 @@ static int isa1000_vib_set(struct isa1000_vib *vib, int on)
 	int rc;
 
 	if (on) {
+		rc = pwm_config(vib->pwm_info.pwm_dev,
+			(pwm_period_ns * (vib->level + LEVEL_MAX)) / (2 * LEVEL_MAX),
+				pwm_period_ns);
+		if (rc < 0) {
+			dev_err(&vib->pdev->dev, "[%s] pwm_config fail\n", __func__);
+			return rc;
+		}
 		rc = pwm_enable(vib->pwm_info.pwm_dev);
 		if (rc < 0) {
-			dev_err(&vib->pdev->dev, "Unable to enable pwm\n");
+			dev_err(&vib->pdev->dev, "[%s] pwm_enable fail\n", __func__);
 			return rc;
 		}
 		gpio_set_value(vib->enable_gpio, 1);
@@ -222,8 +234,10 @@ static int isa1000_setup(struct isa1000_vib *vib)
 	int rc;
 
 	/* Configure PWM */
-	rc = pwm_config_us(vib->pwm_info.pwm_dev, vib->pwm_info.duty_us,
-			vib->pwm_info.period_us);
+	vib->level = LEVEL_DEFAULT;
+	rc = pwm_config(vib->pwm_info.pwm_dev,
+			(pwm_period_ns * (vib->level + LEVEL_MAX)) / (2 * LEVEL_MAX),
+				pwm_period_ns);
 	if (rc < 0) {
 		dev_err(&vib->pdev->dev, "vib pwm config failed %d\n", rc);
 		pwm_free(vib->pwm_info.pwm_dev);
@@ -304,6 +318,48 @@ static int isa1000_parse_dt(struct isa1000_vib *vib)
 	return 0;
 }
 
+static ssize_t vib_min_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", LEVEL_MIN);
+}
+
+static ssize_t vib_max_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", LEVEL_MAX);
+}
+
+static ssize_t vib_level_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	if (!vib_dev)
+		return -1;
+
+	return sprintf(buf, "%d\n", vib_dev->level);
+}
+
+static ssize_t vib_level_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t size)
+{
+	int value;
+
+	if (!vib_dev)
+		return -1;
+
+	sscanf(buf, "%d", &value);
+	if (value < LEVEL_MIN) value = LEVEL_MIN;
+	if (value > LEVEL_MAX) value = LEVEL_MAX;
+
+	vib_dev->level = value;
+
+	return size;
+}
+
+static DEVICE_ATTR(vtg_min, S_IRUGO, vib_min_show, NULL);
+static DEVICE_ATTR(vtg_max, S_IRUGO, vib_max_show, NULL);
+static DEVICE_ATTR(vtg_level, S_IRUGO | S_IWUSR, vib_level_show, vib_level_store);
+
 static int isa1000_probe(struct platform_device *pdev)
 {
 	struct isa1000_vib *vib;
@@ -343,6 +399,10 @@ static int isa1000_probe(struct platform_device *pdev)
 	if (rc < 0)
 		return rc;
 
+	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_min);
+	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_max);
+	device_create_file(vib->timed_dev.dev, &dev_attr_vtg_level);
+
 	vib_dev = vib;
 
 	/* Disable output */
@@ -359,6 +419,9 @@ static int isa1000_remove(struct platform_device *pdev)
 
 	cancel_work_sync(&vib->work);
 	hrtimer_cancel(&vib->vib_timer);
+	device_remove_file(vib->timed_dev.dev, &dev_attr_vtg_min);
+	device_remove_file(vib->timed_dev.dev, &dev_attr_vtg_max);
+	device_remove_file(vib->timed_dev.dev, &dev_attr_vtg_level);
 	timed_output_dev_unregister(&vib->timed_dev);
 	mutex_destroy(&vib->lock);
 
