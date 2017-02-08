@@ -1061,16 +1061,6 @@
 &pmi8994_fg {
 	qcom,battery-data = <&mtp_batterydata>;
 	qcom,ext-sense-type;
-	qcom,warm-bat-decidegc = <450>;
-	qcom,cool-bat-decidegc = <0>;
-	qcom,hot-bat-decidegc  = <600>;
-	qcom,cold-bat-decidegc = <0>;
-};
-
-&pmi8994_charger {
-	qcom,fastchg-current-ma = <1800>;
-	qcom,fastchg-current-comp = <700>;
-	qcom,thermal-mitigation = <1200 1100 1000 950 700>;
 };
 
 &keypad_bl_gpio5 {
