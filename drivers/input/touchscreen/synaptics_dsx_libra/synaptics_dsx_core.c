@@ -19,6 +19,7 @@
  */
 #include <linux/kernel.h>
 #include <linux/module.h>
+#include <linux/proc_fs.h>
 #include <linux/slab.h>
 #include <linux/interrupt.h>
 #include <linux/delay.h>
@@ -642,16 +643,16 @@ static struct device_attribute attrs[] = {
 	__ATTR(flashprog, S_IRUGO,
 			synaptics_rmi4_f01_flashprog_show,
 			synaptics_rmi4_store_error),
-	__ATTR(0dbutton, (S_IRUGO | S_IWUGO),
+	__ATTR(nav_button_enable, (S_IRUGO | S_IWUGO),
 			synaptics_rmi4_0dbutton_show,
 			synaptics_rmi4_0dbutton_store),
 	__ATTR(suspend, S_IWUGO,
 			synaptics_rmi4_show_error,
 			synaptics_rmi4_suspend_store),
-	__ATTR(wake_gesture, (S_IRUGO | S_IWUGO),
+	__ATTR(double_tap_enable, (S_IRUGO | S_IWUGO),
 			synaptics_rmi4_wake_gesture_show,
 			synaptics_rmi4_wake_gesture_store),
-	__ATTR(edge_mode, (S_IRUGO | S_IWUGO),
+	__ATTR(edge_touch_mode, (S_IRUGO | S_IWUGO),
 			synaptics_rmi4_edge_mode_show,
 			synaptics_rmi4_edge_mode_store),
 };
@@ -950,6 +951,30 @@ static ssize_t synaptics_rmi4_virtual_key_map_show(struct kobject *kobj,
 	}
 
 	return count;
+}
+
+static ssize_t synaptics_rmi4_proc_init(struct kobject *sysfs_node_parent) {
+	int ret = 0;
+	char *driver_path;
+
+	struct proc_dir_entry *proc_entry_ts;
+
+	driver_path = kzalloc(PATH_MAX, GFP_KERNEL);
+	if(driver_path) {
+		sprintf(driver_path, "/sys%s", 
+			kobject_get_path(sysfs_node_parent, GFP_KERNEL));
+	}
+
+	proc_entry_ts = proc_symlink("touchscreen", NULL, driver_path);
+	if(proc_entry_ts == NULL) {
+		pr_err("%s: Couldn't symlink to touchscreen\n", __func__);
+	}
+
+	printk("driver_path: %s\n", driver_path);
+
+	kfree(driver_path);
+
+	return ret;
 }
 
 static int synaptics_rmi4_f11_abs_report(struct synaptics_rmi4_data *rmi4_data,
@@ -4046,6 +4071,8 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 			goto err_sysfs;
 		}
 	}
+
+	synaptics_rmi4_proc_init(&rmi4_data->input_dev->dev.kobj);
 
 	rmi4_data->rb_workqueue =
 			alloc_ordered_workqueue("dsx_rebuild_workqueue", WQ_HIGHPRI);
