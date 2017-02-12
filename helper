@@ -1,0 +1,130 @@
+#!/bin/bash
+
+export CROSS_COMPILE="/home/taniuser/android/toolchains/despair-aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+export LDFLAGS=""
+export CFLAGS=""
+export SUBARCH="arm64"
+export ARCH="arm64"
+
+green="\033[01;32m"
+red="\033[01;31m"
+restore="\033[0m"
+
+DIR=`pwd`
+
+VERSION=$(date +"%Y%m%d-%H%M")
+
+KERNEL_SOURCE="$DIR/arch/arm64/boot/Image"
+
+BUILD_TARGET="$DIR/build"
+KERNEL_TARGET="zImage"
+DTB_TARGET="dt.img"
+MODULES_TARGET="modules"
+
+THREADS=$(grep -c ^processor /proc/cpuinfo)
+
+DEFCONFIG="libra_defconfig"
+
+
+echo -e $red"Using $CROSS_COMPILE."$restore
+
+mkdir -p "$BUILD_TARGET"
+
+function echo_help() {
+	echo -e $red"build.sh <option>"$restore
+	echo -e $green"<option>:"$restore
+	echo -e $green"- clean_build"$restore
+	echo "    cleans build directory"
+	echo -e $green"- clean_source"$restore
+	echo "    runs make clean && make mrproper"
+	echo -e $green"- clean_all"$restore
+	echo "    runs clean_build and clean_source"
+	echo -e $green"- compile_defconfig"$restore
+	echo "    runs make defconfig"
+	echo -e $green"- compile"$restore
+	echo "    runs make -j threads"
+	echo -e $green"- compile_clean"$restore
+	echo "    runs clean_all, compile_defconfig and compile"
+	echo -e $restore
+}
+
+COMMAND=$1
+
+function clean_build {
+    rm -f $BUILD_TARGET/$KERNEL_TARGET
+    echo -e $green"Removed kernel image."$restore
+    
+    rm -rf $BUILD_TARGET/$MODULES_TARGET/*
+    echo -e $green"Removed modules."$restore
+    echo
+}
+function clean_source {
+	echo -e $red"Cleaning binaries and configs."$restore
+    make clean && make mrproper
+    echo -e $green"Done."$restore
+    echo
+}
+function clean_all {
+	clean_build
+	clean_source
+}
+function compile_defconfig {
+	echo -e $red"Compiling defconfig."$restore
+	make $DEFCONFIG
+	echo -e $green"Done."$restore
+	echo
+}
+function compile {
+	echo -e $red"Compiling kernel."$restore
+    make -j$THREADS 2>&1 | tee $BUILD_TARGET/$VERSION.log
+    echo -e $green"Done."$restore
+    echo
+
+}
+function compile_clean {
+	clean_all
+	compile_defconfig
+	compile
+}
+function gather {
+	echo -e $red"Copying files to $BUILD_TARGET/$VERSION."$restore
+	mkdir -p "$BUILD_TARGET/$VERSION/$MODULES_TARGET/"
+	cp $KERNEL_SOURCE $BUILD_TARGET/$VERSION/$KERNEL_TARGET
+	$DIR/scripts/dtbTool -o $BUILD_TARGET/$VERSION/$DTB_TARGET  -p $DIR/dtc/ -v $DIR/arch/arm64/boot/dts/
+	find $DIR -not -path *$BUILD_TARGET* -type f -name *.ko -exec cp {} $BUILD_TARGET/$VERSION/$MODULES_TARGET/ \;
+	echo -e $green"Done."$restore
+    echo
+}
+case "$COMMAND" in 
+	clean_build)
+		clean_build
+		;;
+	clean_source)
+		clean_source
+		;;
+	clean_all)
+		clean_all
+		;;
+	compile_defconfig)
+		compile_defconfig
+		;;
+	compile)
+		compile
+		;;
+	compile_clean)
+		compile_clean
+		;;
+	gather)
+		gather
+		;;
+	""|help)
+		echo_help
+		;;
+	*)
+		echo -e $red"Unknown option."$restore
+		echo_help
+		;;
+
+
+esac
+echo -e $restore
