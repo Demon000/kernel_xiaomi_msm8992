@@ -74,7 +74,11 @@ zinstall install: vmlinux
 
 dtbs: scripts
 	$(Q)$(MAKE) $(build)=$(boot)/dts dtbs
+ifeq ($(CONFIG_MACH_LIBRA),y)
+	$(Q)$(MAKE) $(build)=$(boot)/dts/libra dtbs
+else
 	$(Q)$(MAKE) $(build)=$(boot)/dts/qcom dtbs
+endif
 
 PHONY += vdso_install
 vdso_install:
