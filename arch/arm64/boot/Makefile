@@ -13,8 +13,11 @@
 #
 # Based on the ia64 boot/Makefile.
 #
-
+ifeq ($(CONFIG_MACH_LIBRA),y)
+include $(srctree)/arch/arm64/boot/dts/libra/Makefile
+else
 include $(srctree)/arch/arm64/boot/dts/qcom/Makefile
+endif
 
 targets := Image Image.gz
 
