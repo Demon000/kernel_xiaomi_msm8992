@@ -1,0 +1,8 @@
+config MACH_LIBRA
+	bool "Xiaomi MI4C support"
+	default n
+	help
+	 If you say Y here, support for Xiaomi MI4C,
+	 codename libra will be added.
+
+	 If unsure say N.
