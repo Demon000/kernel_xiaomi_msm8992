@@ -37,6 +37,8 @@
 
 #define MXT_KEYARRAY_MAX_KEYS		32
 
+#define BTN_TOOL_EDGE_TOUCH	0x152 
+
 struct mxt_config_info {
 	u8 family_id;
 	u8 variant_id;
