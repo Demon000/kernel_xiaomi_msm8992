@@ -1603,7 +1603,9 @@ static void synaptics_rmi4_report_touch(struct synaptics_rmi4_data *rmi4_data,
 			rmi4_data->fingers_on_2d = false;
 		break;
 	case SYNAPTICS_RMI4_F1A:
-		synaptics_rmi4_f1a_report(rmi4_data, fhandler);
+		if(rmi4_data->button_0d_enabled) {
+			synaptics_rmi4_f1a_report(rmi4_data, fhandler);
+		}
 		break;
 	default:
 		break;
