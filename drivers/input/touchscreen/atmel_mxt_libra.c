@@ -5238,6 +5238,16 @@ static int mxt_proc_init(struct kobject *sysfs_node_parent) {
 	return ret;
 }
 
+static int mxt_proc_remove(void) {
+	int ret = 0;
+	char *driver_path;
+
+	remove_proc_entry("touchscreen", NULL);
+
+	return ret;
+}
+
+
 static int mxt_disable_hsync_config(struct mxt_data *data)
 {
 	int error;
@@ -6468,6 +6478,7 @@ err_remove_mem_access_attr:
 	sysfs_remove_bin_file(&client->dev.kobj, &data->mem_access_attr);
 err_remove_sysfs_group:
 	sysfs_remove_group(&client->dev.kobj, &mxt_attr_group);
+	mxt_proc_remove();
 err_free_irq:
 	free_irq(client->irq, data);
 #ifdef CONFIG_TOUCHSCREEN_ATMEL_MXT_LIBRA_EDGE_SUPPORT
@@ -6511,6 +6522,7 @@ static int mxt_remove(struct i2c_client *client)
 	sysfs_remove_bin_file(&client->dev.kobj, &data->self_ref_attr);
 	sysfs_remove_bin_file(&client->dev.kobj, &data->mem_access_attr);
 	sysfs_remove_group(&client->dev.kobj, &mxt_attr_group);
+	mxt_proc_remove();
 	free_irq(data->irq, data);
 #ifdef CONFIG_TOUCHSCREEN_ATMEL_MXT_LIBRA_EDGE_SUPPORT
 	input_unregister_device(data->edge_input_dev);
