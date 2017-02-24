@@ -891,6 +891,14 @@ static ssize_t synaptics_rmi4_proc_init(struct kobject *sysfs_node_parent) {
 	return ret;
 }
 
+static ssize_t synaptics_rmi4_proc_remove(void) {
+	int ret = 0;
+
+	remove_proc_entry("touchscreen", NULL);
+
+	return ret;
+}
+
 static int synaptics_rmi4_f11_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		struct synaptics_rmi4_fn *fhandler)
 {
@@ -3492,6 +3500,8 @@ static void synaptics_rmi4_rebuild_work(struct work_struct *work)
 				&attrs[attr_count].attr);
 	}
 
+	synaptics_rmi4_proc_remove();
+
 	synaptics_rmi4_free_fingers(rmi4_data);
 	synaptics_rmi4_empty_fn_list(rmi4_data);
 	input_unregister_device(rmi4_data->input_dev);
@@ -3932,6 +3942,8 @@ err_virtual_buttons:
 		kobject_put(rmi4_data->board_prop_dir);
 	}
 
+	synaptics_rmi4_proc_remove();
+
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
 
 err_enable_irq:
@@ -4001,6 +4013,8 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 				&virtual_key_map_attr.attr);
 		kobject_put(rmi4_data->board_prop_dir);
 	}
+
+	synaptics_rmi4_proc_remove();
 
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
 
