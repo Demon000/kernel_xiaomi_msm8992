@@ -46,6 +46,7 @@
 
 #define WAKEUP_GESTURE false
 
+#define NO_0D_WHILE_2D
 #define REPORT_2D_Z
 #define REPORT_2D_W
 
