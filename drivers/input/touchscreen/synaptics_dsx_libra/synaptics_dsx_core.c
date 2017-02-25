@@ -3716,9 +3716,9 @@ static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data,
 		return 0;
 	}
 
-	mutex_lock(&(rmi4_data->rmi4_reset_mutex));
-
 	synaptics_rmi4_irq_enable(rmi4_data, false, false);
+
+	mutex_lock(&(rmi4_data->rmi4_reset_mutex));
 
 	retval = synaptics_rmi4_sw_reset(rmi4_data);
 	if (retval < 0) {
@@ -3751,9 +3751,9 @@ static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data,
 	retval = 0;
 
 exit:
-	synaptics_rmi4_irq_enable(rmi4_data, true, false);
-
 	mutex_unlock(&(rmi4_data->rmi4_reset_mutex));
+
+	synaptics_rmi4_irq_enable(rmi4_data, true, false);
 
 	return retval;
 }
