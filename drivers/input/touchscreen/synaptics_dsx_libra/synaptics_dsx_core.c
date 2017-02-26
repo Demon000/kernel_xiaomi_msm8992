@@ -116,7 +116,6 @@ static int synaptics_rmi4_f12_set_enables(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short ctrl28);
 
 static int synaptics_rmi4_free_fingers(struct synaptics_rmi4_data *rmi4_data);
-static int synaptics_rmi4_reinit_device(struct synaptics_rmi4_data *rmi4_data);
 static int synaptics_rmi4_reset_device(struct synaptics_rmi4_data *rmi4_data,
 		bool rebuild);
 static void synaptics_rmi4_sensor_wake(struct synaptics_rmi4_data *rmi4_data);
@@ -1564,12 +1563,6 @@ static void synaptics_rmi4_sensor_report(struct synaptics_rmi4_data *rmi4_data,
 	status.data[0] = data[0];
 	if (status.unconfigured && !status.flash_prog) {
 		pr_notice("%s: spontaneous reset detected\n", __func__);
-		retval = synaptics_rmi4_reinit_device(rmi4_data);
-		if (retval < 0) {
-			dev_err(rmi4_data->pdev->dev.parent,
-					"%s: Failed to reinit device\n",
-					__func__);
-		}
 	}
 
 	if (!report)
@@ -3564,51 +3557,6 @@ exit:
 	mutex_unlock(&(rmi4_data->rmi4_reset_mutex));
 
 	return;
-}
-
-static int synaptics_rmi4_reinit_device(struct synaptics_rmi4_data *rmi4_data)
-{
-	int retval;
-	struct synaptics_rmi4_fn *fhandler;
-	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
-	struct synaptics_rmi4_device_info *rmi;
-
-	rmi = &(rmi4_data->rmi4_mod_info);
-
-	mutex_lock(&(rmi4_data->rmi4_reset_mutex));
-
-	synaptics_rmi4_free_fingers(rmi4_data);
-
-	if (!list_empty(&rmi->support_fn_list)) {
-		list_for_each_entry(fhandler, &rmi->support_fn_list, link) {
-			if (fhandler->fn_number == SYNAPTICS_RMI4_F12) {
-				synaptics_rmi4_f12_set_enables(rmi4_data, 0);
-				break;
-			}
-		}
-	}
-
-	retval = synaptics_rmi4_int_enable(rmi4_data, true);
-	if (retval < 0)
-		goto exit;
-
-	mutex_lock(&exp_data.mutex);
-	if (!list_empty(&exp_data.list)) {
-		list_for_each_entry(exp_fhandler, &exp_data.list, link)
-			if (exp_fhandler->exp_fn->reinit != NULL)
-				exp_fhandler->exp_fn->reinit(rmi4_data);
-	}
-	mutex_unlock(&exp_data.mutex);
-
-	synaptics_rmi4_set_configured(rmi4_data);
-
-	synaptics_rmi4_enable_edge_touch(rmi4_data, rmi4_data->edge_mode);
-
-	retval = 0;
-
-exit:
-	mutex_unlock(&(rmi4_data->rmi4_reset_mutex));
-	return retval;
 }
 
 static void synaptics_rmi4_calibration_delayed_work(struct work_struct *work)
