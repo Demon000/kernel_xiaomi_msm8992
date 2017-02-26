@@ -1415,6 +1415,10 @@ static void synaptics_rmi4_f1a_report(struct synaptics_rmi4_data *rmi4_data,
 		do_once = 0;
 	}
 
+	if(!rmi4_data->button_0d_enabled) {
+		return;
+	}
+
 	retval = synaptics_rmi4_reg_read(rmi4_data,
 			data_addr,
 			f1a->button_data_buffer,
@@ -1520,9 +1524,7 @@ static void synaptics_rmi4_report_touch(struct synaptics_rmi4_data *rmi4_data,
 			rmi4_data->fingers_on_2d = false;
 		break;
 	case SYNAPTICS_RMI4_F1A:
-		if(rmi4_data->button_0d_enabled) {
-			synaptics_rmi4_f1a_report(rmi4_data, fhandler);
-		}
+		synaptics_rmi4_f1a_report(rmi4_data, fhandler);
 		break;
 	default:
 		break;
