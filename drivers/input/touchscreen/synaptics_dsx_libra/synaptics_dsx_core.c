@@ -112,80 +112,6 @@
 #define INPUT_EVENT_EDGE_FINGER_HANDGRIP	9
 #define INPUT_EVENT_END				9
 
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-#include <linux/fs.h>
-#include <asm/fcntl.h>
-#include <asm/uaccess.h>
-#include <linux/rtc.h>
-
-#define EVENT_TOUCH_WAKEUP	0
-#define EVENT_SCREEN_ON		1
-#define EVENT_SCREEN_OFF	2
-
-static struct file *filp_record;
-static const char *file_record = "/data/synaptics_wakeup.log";
-static unsigned int wakeup_count;
-static atomic_t wakeup_flag = ATOMIC_INIT(0);
-
-static void wakeup_event_record_init(void)
-{
-	filp_record = filp_open(file_record, O_WRONLY | O_CREAT | O_APPEND, 0600);
-	if (IS_ERR(filp_record)) {
-		pr_err("%s open failed\n", file_record);
-		filp_record = NULL;
-		return ;
-	}
-}
-
-static void wakeup_event_record_exit(void)
-{
-	if (filp_record) {
-		filp_close(filp_record, NULL);
-		filp_record = NULL;
-	}
-}
-
-static void wakeup_event_record_write(int event_type)
-{
-	int ret = 0;
-	unsigned char data[256] = {0x0,};
-	struct timespec ts;
-	struct rtc_time tm;
-
-	getnstimeofday(&ts);
-	rtc_time_to_tm(ts.tv_sec, &tm);
-	if (filp_record == NULL) {
-		wakeup_event_record_init();
-		pr_info("Touch wakeup record file created\n");
-	}
-	if (event_type == EVENT_TOUCH_WAKEUP) {
-		wakeup_count++;
-		snprintf(data, "Touch wakeup %d (%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n",
-			wakeup_count, tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-			tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
-	} else if (event_type == EVENT_SCREEN_ON) {
-		snprintf(data, "Screen on (%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n",
-			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-			tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
-	} else {
-		snprintf(data, "Screen off (%d-%02d-%02d %02d:%02d:%02d.%09lu UTC)\n",
-			tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
-			tm.tm_hour, tm.tm_min, tm.tm_sec, ts.tv_nsec);
-	}
-
-	if (filp_record == NULL) {
-		pr_err("File is NULL\n");
-		return;
-	}
-	ret = kernel_write(filp_record, data, strlen(data), filp_record->f_pos);
-	if (ret < 0) {
-		pr_err("%s write failed, return %d\n", file_record, ret);
-		wakeup_event_record_exit();
-		wakeup_event_record_init();
-	}
-}
-#endif
-
 static int synaptics_rmi4_f12_set_enables(struct synaptics_rmi4_data *rmi4_data,
 		unsigned short ctrl28);
 
@@ -1026,10 +952,6 @@ static int synaptics_rmi4_f11_abs_report(struct synaptics_rmi4_data *rmi4_data,
 			return 0;
 
 		if (detected_gestures) {
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-			atomic_set(&wakeup_flag, 1);
-			wakeup_event_record_write(EVENT_TOUCH_WAKEUP);
-#endif
 			input_report_key(rmi4_data->input_dev, KEY_WAKEUP, 1);
 			input_sync(rmi4_data->input_dev);
 			input_report_key(rmi4_data->input_dev, KEY_WAKEUP, 0);
@@ -1192,10 +1114,6 @@ static int synaptics_rmi4_f12_abs_report(struct synaptics_rmi4_data *rmi4_data,
 		return 0;
 
 	if (rmi4_data->suspend && rmi4_data->enable_wakeup_gesture && detected_gestures[0]) {
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-		atomic_set(&wakeup_flag, 1);
-		wakeup_event_record_write(EVENT_TOUCH_WAKEUP);
-#endif
 		/* Wakeup gesture */
 		input_report_key(rmi4_data->input_dev, KEY_WAKEUP, 1);
 		input_sync(rmi4_data->input_dev);
@@ -4139,9 +4057,6 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 	struct synaptics_rmi4_data *rmi4_data = platform_get_drvdata(pdev);
 	const struct synaptics_dsx_board_data *bdata =
 			rmi4_data->hw_if->board_data;
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-	wakeup_event_record_exit();
-#endif
 	if (bdata->use_charger_bit)
 		unregister_power_supply_notifier(&rmi4_data->power_supply_notifier);
 
@@ -4390,19 +4305,9 @@ static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
 			if (*transition == FB_BLANK_POWERDOWN) {
 				synaptics_rmi4_suspend(&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = false;
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-				if (atomic_read(&wakeup_flag) == 1) {
-					wakeup_event_record_write(EVENT_SCREEN_OFF);
-					atomic_set(&wakeup_flag, 0);
-				}
-#endif
 			} else if (*transition == FB_BLANK_UNBLANK) {
 				synaptics_rmi4_resume(&rmi4_data->pdev->dev);
 				rmi4_data->fb_ready = true;
-#ifdef TOUCH_WAKEUP_EVENT_RECORD
-				if (atomic_read(&wakeup_flag) == 1)
-					wakeup_event_record_write(EVENT_SCREEN_ON);
-#endif
 			}
 		}
 	}
