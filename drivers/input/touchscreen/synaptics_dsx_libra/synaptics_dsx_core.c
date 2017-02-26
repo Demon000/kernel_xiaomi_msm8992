@@ -4284,21 +4284,33 @@ static int synaptics_rmi4_fb_notifier_cb(struct notifier_block *self,
 		unsigned long event, void *data)
 {
 	int *transition;
+	bool enable_touch;
 	struct fb_event *evdata = data;
 	struct synaptics_rmi4_data *rmi4_data =
 			container_of(self, struct synaptics_rmi4_data,
 			fb_notifier);
 
-	if (evdata && evdata->data && rmi4_data) {
-		if (event == FB_EVENT_BLANK) {
-			transition = evdata->data;
-			if (*transition == FB_BLANK_POWERDOWN) {
-				synaptics_rmi4_suspend(&rmi4_data->pdev->dev);
-				rmi4_data->fb_ready = false;
-			} else if (*transition == FB_BLANK_UNBLANK) {
-				synaptics_rmi4_resume(&rmi4_data->pdev->dev);
-				rmi4_data->fb_ready = true;
-			}
+	if (evdata && evdata->data && rmi4_data && event == FB_EVENT_BLANK) {
+		transition = evdata->data;
+		switch (*transition) {
+			case FB_BLANK_UNBLANK:
+			case FB_BLANK_NORMAL:
+			case FB_BLANK_VSYNC_SUSPEND:
+			case FB_BLANK_HSYNC_SUSPEND:
+				enable_touch = true;
+				break;
+			case FB_BLANK_POWERDOWN:
+			default:
+				enable_touch = false;
+				break;
+		}
+
+		if (enable_touch) {
+			synaptics_rmi4_resume(&rmi4_data->pdev->dev);
+			rmi4_data->fb_ready = true;
+		} else {
+			synaptics_rmi4_suspend(&rmi4_data->pdev->dev);
+			rmi4_data->fb_ready = false;
 		}
 	}
 
