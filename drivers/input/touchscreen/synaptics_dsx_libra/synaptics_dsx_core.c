@@ -54,11 +54,7 @@
 #define F12_DATA_15_WORKAROUND
 
 #define IGNORE_FN_INIT_FAILURE
-/*
-#define FB_READY_RESET
-#define FB_READY_WAIT_MS 100
-#define FB_READY_TIMEOUT_S 30
-*/
+
 #define RPT_TYPE (1 << 0)
 #define RPT_X_LSB (1 << 1)
 #define RPT_X_MSB (1 << 2)
@@ -3793,43 +3789,6 @@ exit:
 	return retval;
 }
 
-#ifdef FB_READY_RESET
-static void synaptics_rmi4_reset_work(struct work_struct *work)
-{
-	int retval;
-	unsigned int timeout;
-	struct synaptics_rmi4_data *rmi4_data =
-			container_of(work, struct synaptics_rmi4_data,
-			reset_work);
-
-	timeout = FB_READY_TIMEOUT_S * 1000 / FB_READY_WAIT_MS + 1;
-
-	while (!rmi4_data->fb_ready) {
-		msleep(FB_READY_WAIT_MS);
-		timeout--;
-		if (timeout == 0) {
-			dev_err(rmi4_data->pdev->dev.parent,
-					"%s: Timed out waiting for FB ready\n",
-					__func__);
-			return;
-		}
-	}
-
-	mutex_lock(&rmi4_data->rmi4_exp_init_mutex);
-
-	retval = synaptics_rmi4_reset_device(rmi4_data, false);
-	if (retval < 0) {
-		dev_err(rmi4_data->pdev->dev.parent,
-				"%s: Failed to issue reset command\n",
-				__func__);
-	}
-
-	mutex_unlock(&rmi4_data->rmi4_exp_init_mutex);
-
-	return;
-}
-#endif
-
 static void synaptics_rmi4_exp_fn_work(struct work_struct *work)
 {
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
@@ -4104,13 +4063,6 @@ static int synaptics_rmi4_probe(struct platform_device *pdev)
 	INIT_DELAYED_WORK(&rmi4_data->resume_delayed_work,
 			synaptics_rmi4_resume_delayed_work);
 
-#ifdef FB_READY_RESET
-	rmi4_data->reset_workqueue =
-			alloc_ordered_workqueue("dsx_reset_workqueue", WQ_HIGHPRI);
-	INIT_WORK(&rmi4_data->reset_work, synaptics_rmi4_reset_work);
-	queue_work(rmi4_data->reset_workqueue, &rmi4_data->reset_work);
-#endif
-
 	if (bdata->use_charger_bit) {
 		/* Register power supply notifier */
 		rmi4_data->power_supply_notifier.notifier_call =
@@ -4192,12 +4144,6 @@ static int synaptics_rmi4_remove(struct platform_device *pdev)
 #endif
 	if (bdata->use_charger_bit)
 		unregister_power_supply_notifier(&rmi4_data->power_supply_notifier);
-
-#ifdef FB_READY_RESET
-	cancel_work_sync(&rmi4_data->reset_work);
-	flush_workqueue(rmi4_data->reset_workqueue);
-	destroy_workqueue(rmi4_data->reset_workqueue);
-#endif
 
 	cancel_delayed_work_sync(&exp_data.work);
 	flush_workqueue(exp_data.workqueue);
