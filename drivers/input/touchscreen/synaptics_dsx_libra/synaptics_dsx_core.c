@@ -760,8 +760,6 @@ static ssize_t synaptics_rmi4_wake_gesture_store(struct device *dev,
 {
 	unsigned int input;
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-	const struct synaptics_dsx_board_data *bdata =
-		rmi4_data->hw_if->board_data;
 
 	if (sscanf(buf, "%u", &input) != 1)
 		return -EINVAL;
@@ -3031,7 +3029,6 @@ static void synaptics_rmi4_switch_mode_work(struct work_struct *work)
 {
 	struct synaptics_rmi4_mode_switch *ms = container_of(work, struct synaptics_rmi4_mode_switch, switch_mode_work);
 	struct synaptics_rmi4_data *rmi4_data = ms->data;
-	const struct synaptics_dsx_board_data *bdata = rmi4_data->hw_if->board_data;
 	unsigned char value = ms->mode;
 	int retval;
 
@@ -4300,8 +4297,6 @@ static int synaptics_rmi4_suspend(struct device *dev)
 {
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-	const struct synaptics_dsx_board_data *bdata =
-		rmi4_data->hw_if->board_data;
 
 	if (rmi4_data->stay_awake)
 		return 0;
@@ -4341,8 +4336,6 @@ static int synaptics_rmi4_resume(struct device *dev)
 {
 	struct synaptics_rmi4_exp_fhandler *exp_fhandler;
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-	const struct synaptics_dsx_board_data *bdata =
-		rmi4_data->hw_if->board_data;
 
 	if (rmi4_data->stay_awake)
 		return 0;
@@ -4375,8 +4368,6 @@ static int synaptics_rmi4_resume(struct device *dev)
 static int synaptics_rmi4_pm_suspend(struct device *dev)
 {
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-	const struct synaptics_dsx_board_data *bdata =
-		rmi4_data->hw_if->board_data;
 
 	if (device_may_wakeup(dev) &&
 			rmi4_data->enable_wakeup_gesture) {
@@ -4393,8 +4384,6 @@ static int synaptics_rmi4_pm_suspend(struct device *dev)
 static int synaptics_rmi4_pm_resume(struct device *dev)
 {
 	struct synaptics_rmi4_data *rmi4_data = dev_get_drvdata(dev);
-	const struct synaptics_dsx_board_data *bdata =
-		rmi4_data->hw_if->board_data;
 
 	if (device_may_wakeup(dev) &&
 			rmi4_data->enable_wakeup_gesture) {
