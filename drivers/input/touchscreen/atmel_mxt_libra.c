@@ -5289,6 +5289,7 @@ static struct attribute *mxt_attrs[] = {
 	&dev_attr_hover_tune.attr,
 	&dev_attr_hover_from_flash.attr,
 	&dev_attr_panel_color.attr,
+	&dev_attr_nav_button_enable.attr,
 	&dev_attr_edge_touch_mode.attr,
 	NULL
 };
