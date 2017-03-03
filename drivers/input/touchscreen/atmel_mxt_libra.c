@@ -5325,7 +5325,6 @@ static int mxt_proc_init(struct kobject *sysfs_node_parent) {
 
 static int mxt_proc_remove(void) {
 	int ret = 0;
-	char *driver_path;
 
 	remove_proc_entry("touchscreen", NULL);
 
