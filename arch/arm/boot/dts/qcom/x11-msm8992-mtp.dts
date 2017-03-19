@@ -15,7 +15,6 @@
 /dts-v1/;
 
 #include "libra/msm8992.dtsi"
-#include "libra/msm8992-pinctrl.dtsi"
 #include "libra/x11-msm8992-mtp.dtsi"
 
 / {
