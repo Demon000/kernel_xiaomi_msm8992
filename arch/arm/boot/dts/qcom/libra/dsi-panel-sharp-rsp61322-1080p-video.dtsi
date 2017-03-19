@@ -62,12 +62,12 @@
 				15 00 00 00 00 00 02 53 24
 				15 00 00 00 00 00 02 55 01
 				05 01 00 00 14 00 02 29 00
-				05 01 00 00 32 00 02 11 00 ];
-
+				05 01 00 00 32 00 02 11 00
+		];
 		qcom,mdss-dsi-off-command = [
 				05 01 00 00 1D 00 02 28 00
 				05 01 00 00 78 00 02 10 00
-				];
+		];
 		qcom,mdss-dsi-on-command-state = "dsi_lp_mode";
 		qcom,mdss-dsi-off-command-state = "dsi_hs_mode";
 		qcom,mdss-dsi-h-sync-pulse = <0>;
@@ -79,7 +79,9 @@
 		qcom,mdss-dsi-lane-2-state;
 		qcom,mdss-dsi-lane-3-state;
 		qcom,mdss-dsi-lp11-init;
-		qcom,mdss-dsi-panel-timings = [E1 4B 37 00 A9 AB 2A 4F 3D 03 04 00];
+		qcom,mdss-dsi-panel-timings = [
+				E1 4B 37 00 A9 AB 2A 4F 3D 03 04 00
+		];
 		qcom,mdss-dsi-t-clk-post = <0x19>;
 		qcom,mdss-dsi-t-clk-pre = <0x2f>;
 		qcom,mdss-dsi-bl-min-level = <1>;
@@ -91,7 +93,5 @@
 		qcom,mdss-pan-physical-width-dimension = <61>;
 		qcom,mdss-pan-physical-height-dimension = <109>;
 		qcom,cont-splash-enabled;
-
-		};
 	};
-
+};

@@ -44,27 +44,27 @@
 		qcom,mdss-dsi-underflow-color = <0xff>;
 		qcom,mdss-dsi-border-color = <0>;
 		qcom,mdss-dsi-on-command = [
-			15 01 00 00 01 00 02 FF 10
-			15 00 00 00 01 00 02 BB 10
-			15 00 00 00 01 00 02 B0 03
+				15 01 00 00 01 00 02 FF 10
+				15 00 00 00 01 00 02 BB 10
+				15 00 00 00 01 00 02 B0 03
 
-			15 01 00 00 01 00 02 FF 24
-			15 00 00 00 01 00 02 C4 69
-			15 00 00 00 01 00 02 C9 00
-			15 00 00 00 01 00 02 FB 01
+				15 01 00 00 01 00 02 FF 24
+				15 00 00 00 01 00 02 C4 69
+				15 00 00 00 01 00 02 C9 00
+				15 00 00 00 01 00 02 FB 01
 
-			15 01 00 00 01 00 02 FF 10
-			15 00 00 00 01 00 02 35 00
-			05 01 00 00 78 00 02 11 00
-			15 00 00 00 01 00 02 51 de
-			15 00 00 00 01 00 02 53 2c
-			15 00 00 00 01 00 02 55 00
-			15 00 00 00 01 00 02 FF F0
-			15 00 00 00 01 00 02 92 01
-			15 00 00 00 01 00 02 13 01
-			15 00 00 00 01 00 02 FF 10
-			05 01 00 00 28 00 02 29 00
-			];
+				15 01 00 00 01 00 02 FF 10
+				15 00 00 00 01 00 02 35 00
+				05 01 00 00 78 00 02 11 00
+				15 00 00 00 01 00 02 51 de
+				15 00 00 00 01 00 02 53 2c
+				15 00 00 00 01 00 02 55 00
+				15 00 00 00 01 00 02 FF F0
+				15 00 00 00 01 00 02 92 01
+				15 00 00 00 01 00 02 13 01
+				15 00 00 00 01 00 02 FF 10
+				05 01 00 00 28 00 02 29 00
+		];
 		qcom,mdss-dsi-off-command = [
 				15 01 00 00 00 00 02 FF 10
 				39 01 00 00 11 00 02 28 00
@@ -88,12 +88,13 @@
 		qcom,mdss-dsi-te-check-enable;
 		qcom,mdss-dsi-te-using-te-pin;
 		qcom,mdss-dsi-lp11-init;
-		qcom,mdss-dsi-panel-timings = [E0 4A 36 00 A9 AA 2B 4E 3C 03 04 00];
+		qcom,mdss-dsi-panel-timings = [
+				E0 4A 36 00 A9 AA 2B 4E 3C 03 04 00
+		];
 		qcom,mdss-dsi-t-clk-post = <0x19>;
 		qcom,mdss-dsi-t-clk-pre = <0x2f>;
 		qcom,mdss-dsi-bl-min-level = <1>;
 		qcom,mdss-dsi-bl-max-level = <4095>;
-
 		qcom,mdss-dsi-dma-trigger = "trigger_sw";
 		qcom,mdss-dsi-mdp-trigger = "none";
 		qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_wled";
@@ -102,5 +103,4 @@
 		qcom,mdss-pan-physical-height-dimension = <109>;
 		qcom,cont-splash-enabled;
 	};
-	};
-
+};

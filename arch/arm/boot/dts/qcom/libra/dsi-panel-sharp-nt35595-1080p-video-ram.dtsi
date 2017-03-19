@@ -440,7 +440,6 @@
 				15 00 00 00 01 00 02 EA C6
 				15 01 00 00 01 00 02 FF 10
 		];
-
 		qcom,mdss-dsi-off-command = [
 				15 01 00 00 00 00 02 FF 10
 				39 01 00 00 11 00 02 28 00
@@ -458,7 +457,9 @@
 		qcom,mdss-dsi-lane-2-state;
 		qcom,mdss-dsi-lane-3-state;
 		qcom,mdss-dsi-lp11-init;
-		qcom,mdss-dsi-panel-timings = [E0 4A 36 00 A9 AA 2B 4E 3C 03 04 00];
+		qcom,mdss-dsi-panel-timings = [
+				E0 4A 36 00 A9 AA 2B 4E 3C 03 04 00
+		];
 		qcom,mdss-dsi-t-clk-post = <0x19>;
 		qcom,mdss-dsi-t-clk-pre = <0x2f>;
 		qcom,mdss-dsi-bl-min-level = <1>;
@@ -472,5 +473,4 @@
 		qcom,mdss-pan-physical-height-dimension = <109>;
 		qcom,cont-splash-enabled;
 	};
-	};
-
+};
