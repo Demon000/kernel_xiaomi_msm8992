@@ -34,8 +34,6 @@ DEFCONFIG="libra_defconfig"
 
 echo -e $red"Using $CROSS_COMPILE."$restore
 
-mkdir -p "$BUILD_TARGET"
-
 function echo_help() {
 	echo -e $red"build.sh <option>"$restore
 	echo -e $green"<option>:"$restore
