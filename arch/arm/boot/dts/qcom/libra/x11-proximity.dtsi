@@ -27,6 +27,18 @@
 			bias-disable;
 		};
 	};
+
+	cm36686_int_pin {
+		qcom,pins = <&gp 40>;
+		qcom,num-grp-pins = <1>;
+		qcom,pin-func = <0>;
+		label = "cm36686-irq";
+		cm36686_int_default: cm36686_int_default {
+			bias-pull-up;
+			input-enable;
+			drive-strength = <2>;
+		};
+	};
 };
 
 &soc {
