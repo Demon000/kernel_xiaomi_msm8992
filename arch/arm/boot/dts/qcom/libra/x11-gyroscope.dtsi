@@ -11,7 +11,30 @@
  */
 
 &soc {
-	i2c@f9927000 {
+	i2c@f9927000 { /* BLSP5 from (1~12) point view*/
+		compatible = "qcom,i2c-msm-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "qup_phys_addr";
+		reg = <0xf9927000 0x1000>;
+		interrupt-names = "qup_irq";
+		interrupts = <0 99 0>;
+		qcom,clk-freq-out = <400000>;
+		qcom,clk-freq-in  = <19200000>;
+		clock-names = "iface_clk", "core_clk";
+		clocks = <&clock_gcc clk_gcc_blsp1_ahb_clk>,
+			<&clock_gcc clk_gcc_blsp1_qup5_i2c_apps_clk>;
+
+		pinctrl-names = "i2c_active", "i2c_sleep";
+		pinctrl-0 = <&i2c_5_1_active &i2c_5_2_active>;
+		pinctrl-1 = <&i2c_5_1_sleep &i2c_5_2_sleep>;
+		qcom,noise-rjct-scl = <0>;
+		qcom,noise-rjct-sda = <0>;
+		dmas = <&dma_blsp1 20 64 0x20000020 0x20>,
+			<&dma_blsp1 21 32 0x20000020 0x20>;
+		dma-names = "tx", "rx";
+		qcom,master-id = <86>;
+
 		x6db0@08 {
 			compatible = "st,lsm6db0";
 			reg = <0x08>;
@@ -24,6 +47,5 @@
 			vmag-supply = <&pm8994_l18>;
 			i2c-supply = <&pm8994_lvs2>;
 		};
-
 	};
 };
