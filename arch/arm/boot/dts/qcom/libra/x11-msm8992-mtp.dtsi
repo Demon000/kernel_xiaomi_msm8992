@@ -11,6 +11,7 @@
  * GNU General Public License for more details.
  */
 
+#include "msm8992-ramoops.dtsi"
 #include "msm8992-pinctrl.dtsi"
 #include "msm8992-camera-sensor-mtp.dtsi"
 
