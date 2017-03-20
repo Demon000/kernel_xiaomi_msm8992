@@ -1,0 +1,28 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	vibrator-isa1000@c300 {
+		status = "okay";
+		compatible = "vibrator,isa1000";
+		label = "vibrator";
+		vdd-supply = <&vibrator_vreg>;
+		pwms = <&pm8994_pwm_1 0 0>;
+		pinctrl-names = "vibrator_pin_active", "vibrator_pin_suspend";
+		pinctrl-0 = <&vibrator_pin_active>;
+		pinctrl-1 = <&vibrator_pin_suspend>;
+		isa1000,enable-gpio = <&msm_gpio 21 0x00>;
+		isa1000,timeout-ms = <15000>;
+		isa1000,period-us = <44>;
+		isa1000,duty-us = <10>;
+	};
+};

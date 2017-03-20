@@ -16,6 +16,7 @@
 #include "x11-touchscreen.dtsi"
 #include "x11-proximity.dtsi"
 #include "x11-gyroscope.dtsi"
+#include "x11-vibrator.dtsi"
 #include "msm8992-camera-sensor-mtp.dtsi"
 
 #include "dsi-panel-sharp-dualmipi0-wqxga-video.dtsi"
@@ -571,20 +572,6 @@
                 compatible = "pwm-ir";
 		pwms = <&pm8994_pwm_3 0 0>;
         };
-	vibrator-isa1000@c300 {
-		status = "okay";
-		compatible = "vibrator,isa1000";
-		label = "vibrator";
-		vdd-supply = <&vibrator_vreg>;
-		pwms = <&pm8994_pwm_1 0 0>;
-		pinctrl-names = "vibrator_pin_active", "vibrator_pin_suspend";
-		pinctrl-0 = <&vibrator_pin_active>;
-		pinctrl-1 = <&vibrator_pin_suspend>;
-		isa1000,enable-gpio = <&msm_gpio 21 0x00>;
-		isa1000,timeout-ms = <15000>;
-		isa1000,period-us = <44>;
-		isa1000,duty-us = <10>;
-	};
 };
 
 &pm8994_vadc {
