@@ -11,6 +11,7 @@
  */
 
 &i2c_2 {
+	qcom,clk-freq-out = <400000>;
 	atmel_mxt_ts_336t@4a {
 		compatible = "atmel,mxt-ts";
 		reg = <0x4a>;
