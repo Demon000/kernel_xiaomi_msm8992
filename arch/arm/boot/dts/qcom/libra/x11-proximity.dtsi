@@ -10,6 +10,25 @@
  * GNU General Public License for more details.
  */
 
+&tlmm_pinmux {
+	pmx_i2c_7 {
+		qcom,pins = <&gp 43>, <&gp 44>; /* SDA, SCL */
+		qcom,num-grp-pins = <2>;
+		qcom,pin-func = <3>;
+		label = "pmx_i2c_7";
+
+		i2c_7_active: i2c_7_active {
+			drive-strength = <2>;
+			bias-disable;
+		};
+
+		i2c_7_sleep: i2c_7_sleep {
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+}
+
 &soc {
 	i2c@f9963000 { /* BLSP7 from (1~12) point view*/
 		compatible = "qcom,i2c-msm-v2";
