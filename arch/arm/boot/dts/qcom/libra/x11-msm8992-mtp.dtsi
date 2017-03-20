@@ -11,6 +11,7 @@
  * GNU General Public License for more details.
  */
 
+#include "x11-memory.dtsi"
 #include "msm8992-ramoops.dtsi"
 #include "msm8992-pinctrl.dtsi"
 #include "x11-touchscreen.dtsi"
