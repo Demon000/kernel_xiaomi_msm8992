@@ -14,6 +14,7 @@
 #include "msm8992-ramoops.dtsi"
 #include "msm8992-pinctrl.dtsi"
 #include "x11-touchscreen.dtsi"
+#include "x11-proximity.dtsi"
 #include "msm8992-camera-sensor-mtp.dtsi"
 
 #include "dsi-panel-sharp-dualmipi0-wqxga-video.dtsi"
@@ -505,27 +506,6 @@
 			i2c-supply = <&pm8994_lvs2>;
 		};
 
-	};
-	i2c@f9963000 {
-		cm36686@60 {
-			compatible = "cm,cm36686";
-			reg = <0x60>;
-
-			interrupt-parent = <&msm_gpio>;
-			interrupts = <40 0x2008>;
-
-			pinctrl-names = "default";
-			pinctrl-0 = <&cm36686_int_default>;
-
-			vdd-supply = <&pm8994_l18>;
-			prox-int-supply = <&pm8994_s4>;
-			i2c-supply = <&pm8994_lvs2>;
-
-			als_trans_ratio = <16>;
-			prox_default_offset = <1000>;
-			prox_thres_near = <300>;
-			prox_thres_far = <200>;
-		};
 	};
 
 	gpio_keys {

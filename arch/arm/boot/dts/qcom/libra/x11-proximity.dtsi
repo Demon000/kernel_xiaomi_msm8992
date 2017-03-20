@@ -1,0 +1,35 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&soc {
+	i2c@f9963000 {
+		cm36686@60 {
+			compatible = "cm,cm36686";
+			reg = <0x60>;
+
+			interrupt-parent = <&msm_gpio>;
+			interrupts = <40 0x2008>;
+
+			pinctrl-names = "default";
+			pinctrl-0 = <&cm36686_int_default>;
+
+			vdd-supply = <&pm8994_l18>;
+			prox-int-supply = <&pm8994_s4>;
+			i2c-supply = <&pm8994_lvs2>;
+
+			als_trans_ratio = <16>;
+			prox_default_offset = <1000>;
+			prox_thres_near = <300>;
+			prox_thres_far = <200>;
+		};
+	};	
+};
