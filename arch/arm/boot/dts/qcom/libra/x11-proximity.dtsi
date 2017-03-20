@@ -27,7 +27,7 @@
 			bias-disable;
 		};
 	};
-}
+};
 
 &soc {
 	i2c@f9963000 { /* BLSP7 from (1~12) point view*/
