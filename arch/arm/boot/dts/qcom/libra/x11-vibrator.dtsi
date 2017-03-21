@@ -45,3 +45,7 @@
 		isa1000,duty-us = <10>;
 	};
 };
+
+&pm8994_pwm_1 {
+	status = "okay";
+};

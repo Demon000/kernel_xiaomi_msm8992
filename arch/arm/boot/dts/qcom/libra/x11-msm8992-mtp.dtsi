@@ -336,11 +336,6 @@
 	};
 };
 
-/* PWM for vibrator */
-&pm8994_pwm_1 {
-	status = "okay";
-};
-
 /* PWM for IR */
 &pm8994_pwm_3 {
 	status = "okay";
