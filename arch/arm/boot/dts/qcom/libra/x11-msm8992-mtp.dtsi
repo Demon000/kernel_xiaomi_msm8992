@@ -20,6 +20,7 @@
 #include "../msm8992-pinctrl.dtsi"
 #include "x11-pm.dtsi"
 #include "x11-usb.dtsi"
+#include "x11-sound.dtsi"
 #include "x11-battery.dtsi"
 #include "x11-leds.dtsi"
 #include "x11-sensors.dtsi"
@@ -362,24 +363,6 @@
 	};
 };
 
-&slim_msm {
-	tomtom_codec {
-		qcom,cdc-micbias1-ext-cap;
-		qcom,cdc-micbias3-ext-cap;
-		qcom,cdc-micbias4-ext-cap;
-		cdc-vdd-spkdrv-supply = <&pmi8994_boost_pin_ctrl>;
-		qcom,cdc-vdd-spkdrv-voltage = <5000000 5000000>;
-		qcom,cdc-vdd-spkdrv-current = <600000>;
-
-		cdc-vdd-spkdrv-2-supply = <&pmi8994_boost_pin_ctrl>;
-		qcom,cdc-vdd-spkdrv-2-voltage = <5000000 5000000>;
-		qcom,cdc-vdd-spkdrv-2-current = <600000>;
-
-		qcom,cdc-on-demand-supplies = "cdc-vdd-spkdrv",
-					      "cdc-vdd-spkdrv-2";
-	};
-};
-
 &pmi8994_gpios {
 	gpio@c400 {	/* GPIO 5  OTG SWITCH EN */
 		qcom,mode = <1>;	/* DIGITAL OUT */
@@ -464,48 +447,6 @@
 			gpio-key,wakeup;
 			debounce-interval = <15>;
 		};
-	};
-
-	sound {
-		qcom,model = "msm8994-tomtom-mtp-snd-card";
-
-		qcom,audio-routing =
-			"AIF4 VI", "MCLK",
-			"RX_BIAS", "MCLK",
-			"LDO_H", "MCLK",
-			"MADINPUT", "MCLK",
-			"ultrasound amp", "LINEOUT1",
-			"ultrasound amp", "LINEOUT3",
-			"AMIC1", "MIC BIAS1 External",
-			"MIC BIAS1 External", "Handset Mic",
-			"AMIC2", "MIC BIAS2 External",
-			"MIC BIAS2 External", "Headset Mic",
-			"AMIC3", "MIC BIAS3 External",
-			"MIC BIAS3 External", "ANCRight Headset Mic",
-			"AMIC4", "MIC BIAS1 External",
-			"MIC BIAS1 External", "ANCLeft Headset Mic",
-			"AMIC5", "MIC BIAS3 External",
-			"MIC BIAS3 External", "Analog Mic5",
-			"AMIC6", "MIC BIAS4 External",
-			"MIC BIAS4 External", "Analog Mic6",
-			"DMIC1", "MIC BIAS1 External",
-			"MIC BIAS1 External", "Digital Mic1",
-			"DMIC2", "MIC BIAS1 External",
-			"MIC BIAS1 External", "Digital Mic2",
-			"DMIC3", "MIC BIAS3 External",
-			"MIC BIAS3 External", "Digital Mic3",
-			"DMIC4", "MIC BIAS3 External",
-			"MIC BIAS3 External", "Digital Mic4",
-			"DMIC5", "MIC BIAS4 External",
-			"MIC BIAS4 External", "Digital Mic5",
-			"DMIC6", "MIC BIAS4 External",
-			"MIC BIAS4 External", "Digital Mic6";
-
-		qcom,cdc-micbias2-headset-only;
-		qcom,mbhc-audio-jack-type = "4-pole-jack";
-		qcom,ext-ult-spk-amp-gpio = <&pmi8994_gpios 1 0>;
-		asoc-codec = <&stub_codec>;
-		asoc-codec-names = "msm-stub-codec.1";
 	};
 };
 
