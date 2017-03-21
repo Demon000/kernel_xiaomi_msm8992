@@ -928,7 +928,7 @@
 		};
 
 		pmx_ts {
-			qcom,pins = <&gp 60>, <&gp 61>, <&gp 96>, <&gp 110>;
+			qcom,pins = <&gp 60>, <&gp 61>;
 			qcom,pin-func = <0>;
 			qcom,num-grp-pins = <2>;
 			label = "pmx_ts";

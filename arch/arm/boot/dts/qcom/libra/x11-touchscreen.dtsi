@@ -9,6 +9,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+ &tlmm_pinmux {
+	pmx_ts {
+		qcom,pins = <&gp 60>, <&gp 61>, <&gp 96>, <&gp 110>;
+		qcom,pin-func = <0>;
+		qcom,num-grp-pins = <2>;
+		label = "pmx_ts";
+
+		ts_active: ts_active {
+			drive-strength = <16>;
+			bias-pull-up;
+		};
+
+		ts_suspend: ts_suspend {
+			drive-strength = <16>;
+			bias-disable;
+		};
+	};
+ };
 
 &i2c_2 {
 	qcom,clk-freq-out = <400000>;
