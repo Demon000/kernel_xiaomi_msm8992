@@ -18,6 +18,7 @@
 #include "dsi-panel-jdi-nt35595-1080p-video-ram.dtsi"
 #include "dsi-panel-sharp-nt35595-1080p-command.dtsi"
 #include "../msm8992-pinctrl.dtsi"
+#include "x11-pm.dtsi"
 #include "x11-leds.dtsi"
 #include "x11-sensors.dtsi"
 #include "x11-memory.dtsi"

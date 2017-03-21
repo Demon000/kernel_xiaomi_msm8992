@@ -49,17 +49,17 @@
 					"resin-bark", "kpdpwr-resin-bark";
 			qcom,pon-dbc-delay = <15625>;
 			qcom,system-reset;
-			qcom,s3-debounce = <16>;
-			qcom,s3-src = "kpdpwr";
+			qcom,s3-debounce = <32>;
+			qcom,s3-src = "kpdpwr-and-resin";
 
 			qcom,pon_1 {
 				qcom,pon-type = <0>;
 				qcom,pull-up = <1>;
 				linux,code = <116>;
 				qcom,support-reset = <1>;
-				qcom,s1-timer = <4480>;
+				qcom,s1-timer = <10256>;
 				qcom,s2-timer = <2000>;
-				qcom,s2-type = <7>;
+				qcom,s2-type = <1>;
 			};
 
 			qcom,pon_2 {
@@ -70,7 +70,11 @@
 
 			qcom,pon_3 {
 				qcom,pon-type = <3>;
+				qcom,support-reset = <1>;
 				qcom,pull-up = <1>;
+				qcom,s1-timer = <6720>;
+				qcom,s2-timer = <2000>;
+				qcom,s2-type = <7>;
 				qcom,use-bark;
 			};
 		};
@@ -365,7 +369,7 @@
 			      <0xb042 0x7e>;
 			reg-names = "qpnp-lpg-channel-base", "qpnp-lpg-lut-base";
 			qcom,channel-id = <0>;
-			qcom,supported-sizes = <6>, <9>;
+			qcom,supported-sizes = <6>, <7>, <9>;
 			qcom,ramp-index = <0>;
 			#pwm-cells = <2>;
 			status = "disabled";
