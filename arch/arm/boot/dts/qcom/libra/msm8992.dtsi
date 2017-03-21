@@ -2593,37 +2593,27 @@
 			qcom,alias-name = "cpu5";
 		};
 
-		sensor_information13: qcom,sensor-information@13 {
-			qcom,sensor-type =  "alarm";
-			qcom,sensor-name = "pm8994_tz";
-			qcom,scaling-factor = <1000>;
-		};
+                sensor_information13: qcom,sensor-information@13 {
+                        qcom,sensor-type =  "alarm";
+                        qcom,sensor-name = "pm8994_tz";
+                        qcom,scaling-factor = <1000>;
+                };
 
-		sensor_information14: qcom,sensor-information@14 {
-			qcom,sensor-type =  "adc";
-			qcom,sensor-name = "msm_therm";
-		};
+                sensor_information14: qcom,sensor-information@14 {
+                        qcom,sensor-type =  "adc";
+                        qcom,sensor-name = "msm_therm";
+                };
 
-		sensor_information15: qcom,sensor-information@15 {
-			qcom,sensor-type =  "adc";
-			qcom,sensor-name = "emmc_therm";
-		};
+                sensor_information15: qcom,sensor-information@15 {
+                        qcom,sensor-type =  "adc";
+                        qcom,sensor-name = "emmc_therm";
+                };
 
-		sensor_information16: qcom,sensor-information@16 {
-			qcom,sensor-type =  "adc";
-			qcom,sensor-name = "quiet_therm";
-		};
-
-		sensor_information17: qcom,sensor-information@17 {
-			qcom,sensor-type =  "adc";
-			qcom,sensor-name = "xo_therm_buf";
-		};
-
-		sensor_information23: qcom,sensor-information-23 {
-			qcom,sensor-type =  "adc";
-			qcom,sensor-name = "battery";
-		};
-	};
+                sensor_information16: qcom,sensor-information@16 {
+                        qcom,sensor-type =  "adc";
+                        qcom,sensor-name = "quiet_therm";
+                };
+        };
 
 	qcom,msm-thermal {
 		compatible = "qcom,msm-thermal";

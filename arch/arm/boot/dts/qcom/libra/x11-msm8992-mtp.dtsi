@@ -12,6 +12,7 @@
  */
 
 #include "../msm8992-pinctrl.dtsi"
+#include "x11-sensors.dtsi"
 #include "x11-memory.dtsi"
 #include "x11-ramoops.dtsi"
 #include "x11-pins.dtsi"
