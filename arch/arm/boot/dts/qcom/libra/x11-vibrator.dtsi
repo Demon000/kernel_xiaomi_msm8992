@@ -30,6 +30,14 @@
 };
 
 &soc {
+	vibrator_vreg: vibrator_vreg {
+		compatible = "regulator-fixed";
+		regulator-name = "vibrator_vreg";
+		gpio = <&msm_gpio 57 0>;
+		startup-delay-us = <5000>;
+		enable-active-high;
+	};
+
 	vibrator-isa1000@c300 {
 		status = "okay";
 		compatible = "vibrator,isa1000";
