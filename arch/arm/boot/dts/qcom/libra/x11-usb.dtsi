@@ -12,6 +12,7 @@
 
 &soc {
 	i2c@f9928000 { /* BLSP1 QUP6 */
+		status = "ok";
 		pericom@1d {
 			compatible = "pericom,30216a";
 			reg = <0x1d>;

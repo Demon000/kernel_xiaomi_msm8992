@@ -14,24 +14,24 @@
     qcom,pm8994@0 {
         qcom,power-on@800 {
 			qcom,s3-debounce = <16>;
-			qcom,s3-src = "kpdpwr";              
-        };
-        
-        qcom,pon_1 {
-            qcom,s1-timer = <4480>;
-            qcom,s2-type = <7>;
-        };
-        
-        qcom,pon_3 {
-            /delete-node/ qcom,support-reset;
-            /delete-node/ qcom,s1-timer;
-            /delete-node/ qcom,s2-timer;
-            /delete-node/ qcom,s2-type;
+			qcom,s3-src = "kpdpwr";
+
+            qcom,pon_1 {
+                qcom,s1-timer = <4480>;
+                qcom,s2-type = <7>;
+            };
+
+            qcom,pon_3 {
+                /delete-node/ qcom,support-reset;
+                /delete-node/ qcom,s1-timer;
+                /delete-node/ qcom,s2-timer;
+                /delete-node/ qcom,s2-type;
+            };
         };
     };
     
     qcom,pm8994@1 {
-        pm8994_pwm_1 {
+        pm8994_pwm_1: pwm@b100 {
             qcom,supported-sizes = <6>, <9>;
         };
     };
