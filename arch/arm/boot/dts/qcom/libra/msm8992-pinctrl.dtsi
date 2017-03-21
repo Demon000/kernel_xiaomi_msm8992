@@ -434,6 +434,39 @@
 			};
 		};
 
+		tpiu_seta_14 {
+			qcom,pins = <&gp 85>;
+			qcom,num-grp-pins = <1>;
+			qcom,pin-func = <6>;
+			label = "tpiu-seta-14";
+			seta_14: seta {
+				drive-strength = <16>;
+				bias-disable;
+			};
+		};
+
+		tpiu_seta_15 {
+			qcom,pins = <&gp 86>;
+			qcom,num-grp-pins = <1>;
+			qcom,pin-func = <6>;
+			label = "tpiu-seta-15";
+			seta_15: seta {
+				drive-strength = <16>;
+				bias-disable;
+			};
+		};
+
+		tpiu_seta_16 {
+			qcom,pins = <&gp 87>;
+			qcom,num-grp-pins = <1>;
+			qcom,pin-func = <5>;
+			label = "tpiu-seta-16";
+			seta_16: seta {
+				drive-strength = <16>;
+				bias-disable;
+			};
+		};
+
 		tpiu_seta_17 {
 			qcom,pins = <&gp 89>;
 			qcom,num-grp-pins = <1>;
