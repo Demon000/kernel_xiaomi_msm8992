@@ -19,6 +19,7 @@
 #include "dsi-panel-sharp-nt35595-1080p-command.dtsi"
 #include "../msm8992-pinctrl.dtsi"
 #include "x11-pm.dtsi"
+#include "x11-battery.dtsi"
 #include "x11-leds.dtsi"
 #include "x11-sensors.dtsi"
 #include "x11-memory.dtsi"
@@ -780,28 +781,4 @@
 		qcom,hw-settle-time = <0>;
 		qcom,fast-avg-setup = <0>;
 	};
-};
-
-/{
-	mtp_batterydata: qcom,battery-data {
-		qcom,batt-id-range-pct = <15>;
-		#include "batterydata-x11-atl-3080mah.dtsi"
-		#include "batterydata-x11-lg-3080mah.dtsi"
-		#include "batterydata-itech-3020mah.dtsi"
-	};
-};
-
-&pmi8994_fg {
-	qcom,battery-data = <&mtp_batterydata>;
-	qcom,ext-sense-type;
-	qcom,warm-bat-decidegc = <450>;
-	qcom,cool-bat-decidegc = <0>;
-	qcom,hot-bat-decidegc  = <600>;
-	qcom,cold-bat-decidegc = <0>;
-};
-
-&pmi8994_charger {
-	qcom,fastchg-current-ma = <1800>;
-	qcom,fastchg-current-comp = <700>;
-	qcom,thermal-mitigation = <1200 1100 1000 950 700>;
 };
