@@ -13,9 +13,9 @@
 
 #include "../msm8992-pinctrl.dtsi"
 #include "x11-memory.dtsi"
+#include "x11-ramoops.dtsi"
 #include "x11-pins.dtsi"
 #include "x11-sn.dtsi"
-#include "msm8992-ramoops.dtsi"
 #include "x11-camera.dtsi"
 #include "x11-touchscreen.dtsi"
 #include "x11-proximity.dtsi"
