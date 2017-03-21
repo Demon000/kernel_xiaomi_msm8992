@@ -9,11 +9,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
- &tlmm_pinmux {
+
+&tlmm_pinmux {
 	pmx_ts {
 		qcom,pins = <&gp 60>, <&gp 61>, <&gp 96>, <&gp 110>;
 	};
- };
+};
+
+&soc {
+	ts_vreg: ts_vreg {
+		compatible = "regulator-fixed";
+		regulator-name = "ts_vreg";
+		regulator-min-microvolt = <3100000>;
+		regulator-max-microvolt = <3100000>;
+		gpio = <&msm_gpio 110 0>;
+		startup-delay-us = <10000>;
+		enable-active-high;
+	};
+};
 
 &i2c_2 {
 	qcom,clk-freq-out = <400000>;

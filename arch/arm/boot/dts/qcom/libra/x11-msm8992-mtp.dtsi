@@ -402,16 +402,6 @@
 };
 
 &soc {
-	ts_vreg: ts_vreg {
-		compatible = "regulator-fixed";
-		regulator-name = "ts_vreg";
-		regulator-min-microvolt = <3100000>;
-		regulator-max-microvolt = <3100000>;
-		gpio = <&msm_gpio 110 0>;
-		startup-delay-us = <10000>;
-		enable-active-high;
-	};
-
 	tpwdn_vreg: tpwdn_vreg {
 		compatible = "regulator-fixed";
 		regulator-name = "tpwdn_vreg";
