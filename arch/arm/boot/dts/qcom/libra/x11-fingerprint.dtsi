@@ -1,0 +1,100 @@
+/* Copyright (c) 2017, The Linux Foundation. All rights reserved.
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 and
+ * only version 2 as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ */
+
+&tlmm_pinmux {
+	fpc_reset {
+		qcom,pins = <&gp 116>;
+		qcom,num-grp-pins = <1>;
+		qcom,pin-func = <0>;
+		label = "fpc_reset";
+		fpc_reset_reset: reset {
+			drive-strength = <2>;
+			bias-disable;
+			output-low;
+		};
+		fpc_reset_active: active {
+			drive-strength = <2>;
+			bias-disable;
+			output-high;
+		};
+	};
+
+	fpc_irq_active {
+		qcom,pins = <&gp 115>;
+		qcom,num-grp-pins = <1>;
+		qcom,pin-func = <0>;
+		label = "fpc_irq_active";
+		fpc_irq_active: active {
+			drive-strength = <2>;
+			bias-disable;
+			input-enable;
+		};
+	};
+
+	spi12_active_fpc {
+		qcom,pins = <&gp 85>, <&gp 86>, <&gp 87>, <&gp 88>;
+		qcom,num-grp-pins = <4>;
+		qcom,pin-func = <1>;
+		label = "spi12_active";
+		spi12_active_fpc: default {
+			drive-strength = <12>;
+			bias-disable;
+		};
+	};
+
+	spi12_sleep_fpc {
+		qcom,pins = <&gp 85>, <&gp 86>, <&gp 87>, <&gp 88>;
+		qcom,num-grp-pins = <4>;
+		qcom,pin-func = <0>;
+		label = "spi12_sleep";
+		spi12_sleep_fpc: sleep {
+			drive-strength = <2>;
+			bias-disable;
+		};
+	};
+};
+
+/ {
+    memory {
+		tzapp_mem: tzapp_region@0 {
+			linux,reserve-contiguous-region;
+			linux,reserve-region;
+			linux,remove-completely;
+			reg = <0 0x0ea00000 0 0x1900000>;
+			label = "tzapp_mem";
+		};
+    };
+};
+
+&soc {
+	spi@f9968000 { /* SPI : BLSP12(BLSP2 QUP5) */
+		compatible = "qcom,spi-qup-v2";
+		#address-cells = <1>;
+		#size-cells = <0>;
+		reg-names = "spi_physical", "spi_bam_physical";
+		reg = <0x0f9968000 0x500>,
+		      <0x0f9944000 0x19000>;
+		interrupt-names = "spi_irq", "spi_bam_irq";
+		interrupts = <0 106 0>, <0 239 0>;
+		spi-max-frequency = <4800000>;
+		qcom,infinite-mode = <0>;
+		qcom,ver-reg-exists;
+		qcom,bam-consumer-pipe-index = <22>;
+		qcom,bam-producer-pipe-index = <23>;
+		qcom,master-id = <84>;
+
+		clock-names = "iface_clk", "core_clk";
+
+		clocks = <&clock_gcc clk_gcc_blsp2_ahb_clk>,
+			 <&clock_gcc clk_gcc_blsp2_qup6_spi_apps_clk>;
+	};    
+};
