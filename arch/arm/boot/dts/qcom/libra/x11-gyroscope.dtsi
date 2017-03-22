@@ -10,6 +10,12 @@
  * GNU General Public License for more details.
  */
 
+/ {
+	aliases {
+		i2c13  = &i2c_13;
+	};
+};
+
 &tlmm_pinmux {
 	pmx_i2c_5_1 {
 		qcom,pins = <&gp 23>; /* SDA*/

@@ -10,6 +10,12 @@
  * GNU General Public License for more details.
  */
 
+/ {
+	aliases {
+		spi12 = &spi_12;
+	};
+};
+
 &tlmm_pinmux {
 	fpc_reset {
 		qcom,pins = <&gp 116>;
@@ -76,7 +82,7 @@
 };
 
 &soc {
-	spi@f9968000 { /* SPI : BLSP12(BLSP2 QUP5) */
+	spi_12: spi@f9968000 { /* SPI : BLSP12(BLSP2 QUP5) */
 		compatible = "qcom,spi-qup-v2";
 		#address-cells = <1>;
 		#size-cells = <0>;
