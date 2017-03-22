@@ -92,7 +92,7 @@
 };
 
 &soc {
-	i2c@f9927000 { /* BLSP5 from (1~12) point view*/
+	i2c_13: i2c@f9927000 { /* BLSP5 from (1~12) point view*/
 		compatible = "qcom,i2c-msm-v2";
 		#address-cells = <1>;
 		#size-cells = <0>;
