@@ -106,8 +106,9 @@ static int isa1000_set_state(struct isa1000_vib *vib, int on)
 	if (on) {
 		int rc;
 		unsigned int pwm_period_ns = NSEC_PER_SEC / vib->pwm_frequency;
+		unsigned int value = pwm_period_ns * vib->pwm_duty_percent / 100;
 
-		rc = pwm_config(vib->pwm_dev, (pwm_period_ns * vib->pwm_duty_percent) / 100, pwm_period_ns);
+		rc = pwm_config(vib->pwm_dev, value, pwm_period_ns);
 		if (rc < 0) {
 			pr_err("unable to config pwm\n");
 			return rc;
@@ -215,10 +216,6 @@ static int isa1000_probe(struct platform_device *pdev)
 	if (!rc) {
 		vib->timeout = temp_val;
 	}
-
-	dev_info(&pdev->dev, "enable-gpio: %i, timeout-ms: %i",
-			vib->enable_gpio,
-			vib->timeout);
 
 	rc = regulator_enable(vib->regulator_vdd);
 	if (rc < 0) {
