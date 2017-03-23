@@ -19,6 +19,10 @@
 
 #include "../staging/android/timed_output.h"
 
+#define PWM_PERCENT_DEFAULT	100
+#define PWM_PERCENT_MIN		0
+#define PWM_PERCENT_MAX		100
+
 struct isa1000_vib {
 	struct platform_device *pdev;
 	struct pwm_device *pwm_dev;
@@ -41,6 +45,60 @@ static struct isa1000_vib vib_dev = {
 	.pwm_frequency = 30000,
 	.pwm_duty_percent = 100,
 	.timeout = 15000
+};
+
+static ssize_t isa1000_pwm_min_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", PWM_PERCENT_MIN);
+}
+
+static ssize_t isa1000_pwm_max_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	return sprintf(buf, "%d\n", PWM_PERCENT_MAX);
+}
+
+static ssize_t isa1000_pwm_show(struct device *dev,
+		struct device_attribute *attr, char *buf)
+{
+	struct timed_output_dev *timed_dev = dev_get_drvdata(dev);
+	struct isa1000_vib *vib =
+			container_of(timed_dev, struct isa1000_vib, timed_dev);
+
+	return sprintf(buf, "%d\n", vib->pwm_duty_percent);
+}
+
+static ssize_t isa1000_pwm_store(struct device *dev,
+		struct device_attribute *attr, const char *buf, size_t size)
+{
+	struct timed_output_dev *timed_dev = dev_get_drvdata(dev);
+	struct isa1000_vib *vib =
+			container_of(timed_dev, struct isa1000_vib, timed_dev);
+	int tmp;
+
+	sscanf(buf, "%d", &tmp);
+	if (tmp > PWM_PERCENT_MAX) {
+		tmp = PWM_PERCENT_MAX;
+	} else if (tmp < PWM_PERCENT_MIN) {
+		tmp = PWM_PERCENT_MIN;
+	}
+
+	vib->pwm_duty_percent = tmp;
+
+	return size;
+}
+
+static struct device_attribute isa1000_device_attrs[] = {
+	__ATTR(vtg_min, S_IRUGO | S_IWUSR,
+			isa1000_pwm_min_show,
+			NULL),
+	__ATTR(vtg_max, S_IRUGO | S_IWUSR,
+			isa1000_pwm_max_show,
+			NULL),
+	__ATTR(vtg_level, S_IRUGO | S_IWUSR,
+			isa1000_pwm_show,
+			isa1000_pwm_store),
 };
 
 static int isa1000_set_state(struct isa1000_vib *vib, int on)
@@ -123,7 +181,7 @@ static int isa1000_probe(struct platform_device *pdev)
 {
 	struct isa1000_vib *vib;
 	u32 temp_val;
-	int rc;
+	int rc, attr_count;
 
 	printk("%s: starting\n", __func__);
 
@@ -188,6 +246,14 @@ static int isa1000_probe(struct platform_device *pdev)
 	if(rc < 0) {
 		dev_err(&pdev->dev, "%s: failed to register timed output device\n", __func__);
 		goto error;
+	}
+
+	for (attr_count = 0; attr_count < ARRAY_SIZE(isa1000_device_attrs); attr_count++) {
+		rc = device_create_file(vib->timed_dev.dev, &isa1000_device_attrs[attr_count]);
+		if (rc < 0) {
+			dev_err(&pdev->dev, "%s: failed to create sysfs attributes\n", __func__);
+			goto error;
+		}
 	}
 
 	return 0;
