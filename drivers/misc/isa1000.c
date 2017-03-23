@@ -1,4 +1,5 @@
-/* Copyright (c) 2017, Cosmin Tanislav(demonsingur@gmail.com). All rights reserved.
+/* Copyright (c) 2017, Cosmin Tanislav(demonsingur@gmail.com).
+ * All rights reserved.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 and
@@ -78,11 +79,11 @@ static ssize_t isa1000_pwm_store(struct device *dev,
 	int tmp;
 
 	sscanf(buf, "%d", &tmp);
-	if (tmp > PWM_PERCENT_MAX) {
+
+	if (tmp > PWM_PERCENT_MAX)
 		tmp = PWM_PERCENT_MAX;
-	} else if (tmp < PWM_PERCENT_MIN) {
+	else if (tmp < PWM_PERCENT_MIN)
 		tmp = PWM_PERCENT_MIN;
-	}
 
 	vib->pwm_duty_percent = tmp;
 
@@ -104,9 +105,9 @@ static struct device_attribute isa1000_device_attrs[] = {
 static int isa1000_set_state(struct isa1000_vib *vib, int on)
 {
 	if (on) {
-		int rc;
 		unsigned int pwm_period_ns = NSEC_PER_SEC / vib->pwm_frequency;
 		unsigned int value = pwm_period_ns * vib->pwm_duty_percent / 100;
+		int rc;
 
 		rc = pwm_enable(vib->pwm_dev);
 		if (rc < 0) {
@@ -137,7 +138,8 @@ static void isa1000_update(struct work_struct *work)
 
 static enum hrtimer_restart isa1000_timer_func(struct hrtimer *timer)
 {
-	struct isa1000_vib *vib = container_of(timer, struct isa1000_vib, vib_timer);
+	struct isa1000_vib *vib = container_of(timer,
+			struct isa1000_vib, vib_timer);
 
 	vib->state = 0;
 	schedule_work(&vib->work);
@@ -164,9 +166,9 @@ static void isa1000_enable(struct timed_output_dev *dev, int value)
 	mutex_lock(&vib->lock);
 	hrtimer_cancel(&vib->vib_timer);
 
-	if (value == 0)
+	if (value == 0) {
 		vib->state = 0;
-	else {
+	} else {
 		vib->state = 1;
 		value = value > vib->timeout ? vib->timeout : value;
 		hrtimer_start(&vib->vib_timer,
@@ -182,9 +184,8 @@ static int isa1000_probe(struct platform_device *pdev)
 {
 	struct isa1000_vib *vib;
 	u32 temp_val;
-	int rc, attr_count;
-
-	printk("%s: starting\n", __func__);
+	int rc;
+	int i;
 
 	platform_set_drvdata(pdev, &vib_dev);
 	vib = (struct isa1000_vib *) platform_get_drvdata(pdev);
@@ -241,14 +242,16 @@ static int isa1000_probe(struct platform_device *pdev)
 
 	rc = timed_output_dev_register(&vib->timed_dev);
 	if(rc < 0) {
-		dev_err(&pdev->dev, "%s: failed to register timed output device\n", __func__);
+		dev_err(&pdev->dev,
+				"%s: failed to register timed output device\n", __func__);
 		goto error;
 	}
 
-	for (attr_count = 0; attr_count < ARRAY_SIZE(isa1000_device_attrs); attr_count++) {
-		rc = device_create_file(vib->timed_dev.dev, &isa1000_device_attrs[attr_count]);
+	for (i = 0; i < ARRAY_SIZE(isa1000_device_attrs); i++) {
+		rc = device_create_file(vib->timed_dev.dev, &isa1000_device_attrs[i]);
 		if (rc < 0) {
-			dev_err(&pdev->dev, "%s: failed to create sysfs attributes\n", __func__);
+			dev_err(&pdev->dev,
+					"%s: failed to create sysfs attributes\n", __func__);
 			goto error;
 		}
 	}
@@ -264,22 +267,16 @@ static int isa1000_remove(struct platform_device *pdev)
 	struct isa1000_vib *vib = dev_get_drvdata(&pdev->dev);
 
 	timed_output_dev_unregister(&vib->timed_dev);
-
 	hrtimer_cancel(&vib->vib_timer);
-
 	cancel_work_sync(&vib->work);
-
 	mutex_destroy(&vib->lock);
-
 	gpio_free(vib->enable_gpio);
 
 	return 0;
 }
 
 static struct of_device_id vibrator_match_table[] = {
-	{
-		.compatible = "vibrator,isa1000",
-	},
+	{ .compatible = "vibrator,isa1000", },
 	{}
 };
 
