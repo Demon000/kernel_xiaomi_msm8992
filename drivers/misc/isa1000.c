@@ -120,9 +120,9 @@ static int isa1000_set_state(struct isa1000_vib *vib, int on)
 			return rc;
 		}
 
-		gpio_set_value(vib->enable_gpio, 1);
+		gpio_set_value_cansleep(vib->enable_gpio, 1);
 	} else {
-		gpio_set_value(vib->enable_gpio, 0);
+		gpio_set_value_cansleep(vib->enable_gpio, 0);
 		pwm_disable(vib->pwm_dev);
 	}
 
