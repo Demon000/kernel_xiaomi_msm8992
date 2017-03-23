@@ -108,15 +108,15 @@ static int isa1000_set_state(struct isa1000_vib *vib, int on)
 		unsigned int pwm_period_ns = NSEC_PER_SEC / vib->pwm_frequency;
 		unsigned int value = pwm_period_ns * vib->pwm_duty_percent / 100;
 
-		rc = pwm_config(vib->pwm_dev, value, pwm_period_ns);
-		if (rc < 0) {
-			pr_err("unable to config pwm\n");
-			return rc;
-		}
-
 		rc = pwm_enable(vib->pwm_dev);
 		if (rc < 0) {
 			pr_err("unable to enable pwm\n");
+			return rc;
+		}
+
+		rc = pwm_config(vib->pwm_dev, value, pwm_period_ns);
+		if (rc < 0) {
+			pr_err("unable to config pwm\n");
 			return rc;
 		}
 
