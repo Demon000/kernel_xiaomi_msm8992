@@ -39,7 +39,7 @@ struct isa1000_vib {
 	int pwm_duty_percent;
 	int enable_gpio;
 	int timeout;
-	int state;
+	bool state;
 };
 
 static struct isa1000_vib vib_dev = {
@@ -102,7 +102,7 @@ static struct device_attribute isa1000_device_attrs[] = {
 			isa1000_pwm_store),
 };
 
-static int isa1000_set_state(struct isa1000_vib *vib, int on)
+static int isa1000_set_state(struct isa1000_vib *vib, bool on)
 {
 	if (on) {
 		unsigned int pwm_period_ns = NSEC_PER_SEC / vib->pwm_frequency;
