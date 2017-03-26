@@ -1,0 +1,111 @@
+#!/bin/bash
+
+export CROSS_COMPILE="/home/taniuser/android/toolchains/despair-aarch64-linux-android-4.9/bin/aarch64-linux-android-"
+export LDFLAGS=""
+export CFLAGS=""
+export SUBARCH="arm64"
+export ARCH="arm64"
+
+green="\033[01;32m"
+red="\033[01;31m"
+restore="\033[0m"
+
+DIR=`pwd`
+
+VERSION=$(date +"%Y%m%d-%H%M")
+
+KERNEL_SOURCE="$DIR/arch/arm64/boot"
+
+IMAGE_SOURCE="$KERNEL_SOURCE/Image"
+IMAGE_GZ_SOURCE="$KERNEL_SOURCE/Image.gz"
+IMAGE_GZ_DTB_SOURCE="$KERNEL_SOURCE/Image.gz-dtb"
+DTB_SOURCE="$DIR/arch/arm/boot/dts"
+
+BUILD_TARGET="$DIR/build/$VERSION"
+
+IMAGE_TARGET="$BUILD_TARGET/Image"
+IMAGE_GZ_TARGET="$BUILD_TARGET/Image.gz"
+IMAGE_GZ_DTB_TARGET="$BUILD_TARGET/Image.gz-dtb"
+DTB_TARGET="$BUILD_TARGET/dt.img"
+
+THREADS=$(grep -c ^processor /proc/cpuinfo)
+
+DEFCONFIG="libra_defconfig"
+
+echo -e $red"Using $CROSS_COMPILE."$restore
+
+function echo_help() {
+	echo -e $red"build.sh <option>"$restore
+	echo -e $green"<option>:"$restore
+	echo -e $green"- clean_all"$restore
+	echo "    runs make clean && make mrproper"
+	echo -e $green"- compile_defconfig"$restore
+	echo "    runs make defconfig"
+	echo -e $green"- compile"$restore
+	echo "    runs make -j threads"
+	echo -e $green"- compile_clean"$restore
+	echo "    runs clean_all, compile_defconfig and compile"
+	echo -e $restore
+}
+
+COMMAND=$1
+
+function clean_all {
+	echo -e $red"Cleaning binaries and configs."$restore
+	make clean && make mrproper
+	echo -e $green"Done."$restore
+	echo
+}
+function compile_defconfig {
+	echo -e $red"Compiling defconfig."$restore
+	make $DEFCONFIG
+	echo -e $green"Done."$restore
+	echo
+}
+function compile {
+	echo -e $red"Compiling kernel."$restore
+	make -j$THREADS 2>&1 | tee $BUILD_TARGET.log
+	echo -e $green"Done."$restore
+	echo
+}
+function compile_clean {
+	clean_all
+	compile_defconfig
+	compile
+}
+function gather {
+	echo -e $red"Copying files to $BUILD_TARGET."$restore
+	mkdir -p "$BUILD_TARGET"
+	cp $IMAGE_SOURCE $IMAGE_TARGET
+	cp $IMAGE_GZ_SOURCE $IMAGE_GZ_TARGET
+	cp $IMAGE_GZ_DTB_SOURCE $IMAGE_GZ_DTB_TARGET
+	$DIR/scripts/dtbTool -o $DTB_TARGET  -p $DIR/dtc/ -v $DTB_SOURCE
+	echo -e $green"Done."$restore
+	echo
+}
+case "$COMMAND" in 
+	clean_all)
+		clean_all
+		;;
+	compile_defconfig)
+		compile_defconfig
+		;;
+	compile)
+		compile
+		;;
+	compile_clean)
+		compile_clean
+		;;
+	gather)
+		gather
+		;;
+	""|help)
+		echo_help
+		;;
+	*)
+		echo -e $red"Unknown option."$restore
+		echo_help
+		;;
+
+esac
+echo -e $restore
