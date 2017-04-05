@@ -26,7 +26,6 @@
 #include "x11-proximity.dtsi"
 #include "x11-gyroscope.dtsi"
 #include "x11-vibrator.dtsi"
-#include "x11-fingerprint.dtsi"
 
 #include "dsi-panel-sharp-rsp61322-1080p-video.dtsi"
 #include "dsi-panel-auo-nt35596-1080p-video.dtsi"
