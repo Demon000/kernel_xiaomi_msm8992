@@ -20,7 +20,7 @@
 #include "common-memory.dtsi"
 #include "common-ramoops.dtsi"
 #include "common-pins.dtsi"
-#include "x11-sn.dtsi"
+#include "common-sn.dtsi"
 #include "common-camera.dtsi"
 #include "x11-touchscreen.dtsi"
 #include "common-proximity.dtsi"
