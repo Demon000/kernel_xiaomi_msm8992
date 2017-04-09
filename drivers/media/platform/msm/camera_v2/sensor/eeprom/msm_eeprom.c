@@ -22,6 +22,64 @@
 #define CDBG(fmt, args...) pr_debug(fmt, ##args)
 
 DEFINE_MSM_MUTEX(msm_eeprom_mutex);
+
+#ifdef CONFIG_MACH_LIBRA
+#define EEPROM_ONSEMI_ADDR 0x7C
+
+#define X7_FRONT_MODULE_ID_OFFSET 0x1
+#define X7_FRONT_PAGE0_OFFSET 0x20
+#define X7_FRONT_PAGE1_OFFSET 0x10
+#define X7_FRONT_PAGE2_OFFSET 0x0
+#define X7_FRONT_MODULE_ID_PRIMAX 0x25
+#define X7_FRONT_MODULE_ID_LIETON 0x15
+#define X7_FRONT_MODULE_PRIMAX "ov4688"
+#define X7_FRONT_MODULE_LITEON "ov4688_liteon"
+
+#define X7_BACK_MODULE_ID_OFFSET 0x0
+#define X7_BACK_MODULE_ID_PRIMAX 0x17
+#define X7_BACK_MODULE_ID_LIETON 0x15
+#define X7_BACK_MODULE_PRIMAX "imx214"
+#define X7_BACK_MODULE_LITEON "imx214_liteon"
+#define X7_FRONT_SENSOR_NAME "ov4688"
+#define X7_BACK_SENSOR_NAME "sony_imx214"
+
+#define X11_BACK_SUNNY_MODULE_ID_OFFSET 0x1
+#define X11_BACK_OFILM_MODULE_ID_OFFSET 0x7
+#define X11_BACK_MODULE_ID_SUNNY 0x01
+#define X11_BACK_MODULE_ID_OFILM 0x07
+#define X11_BACK_MODULE_OFILM "imx258"
+#define X11_BACK_MODULE_SUNNY "imx258_sunny"
+#define X11_BACK_SENSOR_NAME "imx258"
+#define X11_BACK_3M2_SENSOR_NAME "s5k3m2xm"
+#define X11_BACK_OFILM_SIZE 2160
+#define X11_BACK_SUNNY_SIZE 2964
+#define X11_BACK_OFILM_SPC_START 0x07F1
+#define X11_BACK_OFILM_SPC_END 0x086E
+#define X11_BACK_SUNNY_SPC_OFFSET   0x0B14
+
+#define X11_BACK_3M2_MODULE_OFILM "s5k3m2xm_ofilm"
+#define X11_BACK_3M2_MODULE_SUNNY "s5k3m2xm"
+#define X11_BACK_3M2_SENSOR_NAME "s5k3m2xm"
+
+#define X11_FRONT_SUNNY_MODULE_ID_OFFSET 0x1
+#define X11_FRONT_OFILM_MODULE_ID_OFFSET 0x1
+#define X11_FRONT_MODULE_ID_SUNNY 0x01
+#define X11_FRONT_MODULE_ID_OFILM 0x07
+#define X11_FRONT_MODULE_OFILM "ov5670"
+#define X11_FRONT_MODULE_SUNNY "ov5670_sunny"
+#define X11_FRONT_SENSOR_NAME "ov5670"
+
+static int x7_set_front_sensor_name;
+static char x7_front_sensor_name[32];
+static int x7_set_back_sensor_name;
+static char x7_back_sensor_name[32];
+
+static int x11_set_back_sensor_name;
+static char x11_back_sensor_name[32];
+static int x11_set_front_sensor_name;
+static char x11_front_sensor_name[32];
+#endif
+
 #ifdef CONFIG_COMPAT
 static struct v4l2_file_operations msm_eeprom_v4l2_subdev_fops;
 #endif
@@ -49,6 +107,242 @@ static int msm_eeprom_verify_sum(const char *mem, uint32_t size, uint32_t sum)
 	CDBG("%s: checksum pass 0x%x\n", __func__, sum);
 	return 0;
 }
+
+#ifdef CONFIG_MACH_LIBRA
+static void set_back_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl,
+		char *mapdata)
+{
+	uint8_t *memptr;
+	int offset;
+
+	if (x7_set_back_sensor_name)
+		return;
+
+	memptr = mapdata;
+	offset = X7_BACK_MODULE_ID_OFFSET;
+
+	if (memptr[offset] == X7_BACK_MODULE_ID_PRIMAX) {
+		strcpy(x7_back_sensor_name, X7_BACK_MODULE_PRIMAX);
+		x7_set_back_sensor_name = 1;
+		CDBG("back sensor name = %s\n", x7_back_sensor_name);
+	} else if (memptr[offset] == X7_BACK_MODULE_ID_LIETON) {
+		strcpy(x7_back_sensor_name, X7_BACK_MODULE_LITEON);
+		x7_set_back_sensor_name = 1;
+		CDBG("back sensor name = %s\n", x7_back_sensor_name);
+	} else {
+		pr_err("x7 back sensor name not match!\n");
+	}
+}
+
+static int x11_check_ofilm_sensor(char *memptr, int start, int end)
+{
+	int i = 0, count = 0;
+
+	for (i = 0; i < (end - start); i++) {
+		count += memptr[start + i];
+	}
+	return count / 0xFF;
+}
+
+static void set_x11_back_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl,
+		char *mapdata)
+{
+	uint8_t *memptr;
+	int ofilm_sensor;
+
+	if (x11_set_back_sensor_name)
+		return;
+
+	memptr = mapdata;
+
+	if (e_ctrl->cal_data.num_data == X11_BACK_OFILM_SIZE) {
+	/* check ofilm SPC */
+		ofilm_sensor = x11_check_ofilm_sensor(memptr,
+		X11_BACK_OFILM_SPC_START,
+		X11_BACK_OFILM_SPC_END);
+		if (ofilm_sensor !=
+			(X11_BACK_OFILM_SPC_END - X11_BACK_OFILM_SPC_START)) {
+			strcpy(x11_back_sensor_name, X11_BACK_MODULE_OFILM);
+			x11_set_back_sensor_name = 1;
+			CDBG("x11 back sensor name = %s\n", x11_back_sensor_name);
+			return;
+		} else {
+			strcpy(x11_back_sensor_name, X11_BACK_3M2_MODULE_OFILM);
+			x11_set_back_sensor_name = 1;
+			CDBG("x11 back sensor name = %s\n", x11_back_sensor_name);
+			return;
+		}
+		} else if (e_ctrl->cal_data.num_data == X11_BACK_SUNNY_SIZE) {
+		/* check sunny SPC */
+		if (memptr[X11_BACK_SUNNY_SPC_OFFSET] == 0x01) {
+			strcpy(x11_back_sensor_name, X11_BACK_MODULE_SUNNY);
+			x11_set_back_sensor_name = 1;
+			CDBG("x11 back sensor name = %s\n", x11_back_sensor_name);
+			return;
+		} else if (memptr[X11_BACK_SUNNY_SPC_OFFSET] == 0xFF) {
+			strcpy(x11_back_sensor_name, X11_BACK_3M2_MODULE_SUNNY);
+			x11_set_back_sensor_name = 1;
+			CDBG("x11 back sensor name = %s\n", x11_back_sensor_name);
+			return;
+		} else {
+			pr_err("x11 back sunny sensor name not match!\n");
+		}
+		} else {
+			pr_err("x11 back sensor name not match!\n");
+		}
+}
+
+static void set_x11_front_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl,
+		char *mapdata)
+{
+	uint8_t *memptr;
+	int offset;
+
+	if (x11_set_front_sensor_name)
+		return;
+
+	memptr = mapdata;
+
+	offset = X11_FRONT_OFILM_MODULE_ID_OFFSET;
+	if (memptr[offset] == X11_FRONT_MODULE_ID_OFILM) {
+		strcpy(x11_front_sensor_name, X11_FRONT_MODULE_OFILM);
+		x11_set_front_sensor_name = 1;
+		CDBG("x11 front sensor name = %s\n", x11_front_sensor_name);
+		return;
+	}
+
+	offset = X11_FRONT_SUNNY_MODULE_ID_OFFSET;
+	if (memptr[offset] == X11_FRONT_MODULE_ID_SUNNY) {
+		strcpy(x11_front_sensor_name, X11_FRONT_MODULE_SUNNY);
+		x11_set_front_sensor_name = 1;
+		CDBG("x11 front sensor name = %s\n", x11_front_sensor_name);
+		return;
+	}
+
+	pr_err("x11 front sensor name not match!\n");
+}
+
+static void set_front_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl,
+		char *mapdata)
+{
+	uint8_t *memptr;
+	int offset;
+
+	if (x7_set_front_sensor_name)
+		return;
+
+	memptr = mapdata;
+
+	if ((memptr[X7_FRONT_PAGE0_OFFSET] & 0x40) == 0x40)
+		offset = X7_FRONT_PAGE0_OFFSET + X7_FRONT_MODULE_ID_OFFSET;
+	else if ((memptr[X7_FRONT_PAGE1_OFFSET] & 0x40) == 0x40)
+		offset = X7_FRONT_PAGE1_OFFSET + X7_FRONT_MODULE_ID_OFFSET;
+	else if ((memptr[X7_FRONT_PAGE2_OFFSET] & 0x40) == 0x40)
+		offset = X7_FRONT_PAGE2_OFFSET + X7_FRONT_MODULE_ID_OFFSET;
+	else
+		return;
+
+	if (memptr[offset] == X7_FRONT_MODULE_ID_PRIMAX) {
+		strcpy(x7_front_sensor_name, X7_FRONT_MODULE_PRIMAX);
+		x7_set_front_sensor_name = 1;
+		CDBG("x7 front sensor name = %s\n", x7_front_sensor_name);
+	} else if (memptr[offset] == X7_FRONT_MODULE_ID_LIETON) {
+		if (memptr[offset+1] == 1) /* 0x1501 is largan 02 is GS */
+			strcpy(x7_front_sensor_name, X7_FRONT_MODULE_PRIMAX);
+		else
+			strcpy(x7_front_sensor_name, X7_FRONT_MODULE_LITEON);
+
+		x7_set_front_sensor_name = 1;
+		CDBG("x7 front sensor name = %s\n", x7_front_sensor_name);
+	} else {
+		pr_err("x7 front sensor name not match!\n");
+	}
+}
+
+static void x7_set_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl, char *mapdata)
+{
+	struct msm_eeprom_board_info *eb_info;
+
+	eb_info = e_ctrl->eboard_info;
+
+	if (e_ctrl->eboard_info->eeprom_name == NULL || mapdata == NULL)
+		return;
+
+	if (!strcmp(eb_info->eeprom_name, X7_BACK_SENSOR_NAME)) {
+		set_back_sensor_name(e_ctrl, mapdata);
+	} else if (!strcmp(eb_info->eeprom_name, X7_FRONT_SENSOR_NAME)) {
+		set_front_sensor_name(e_ctrl, mapdata);
+	} else {
+		pr_err("x7 sensor name check failed\n");
+	}
+}
+
+static void x11_set_sensor_name(struct msm_eeprom_ctrl_t *e_ctrl, char *mapdata)
+{
+	struct msm_eeprom_board_info *eb_info;
+
+	eb_info = e_ctrl->eboard_info;
+
+	if (e_ctrl->eboard_info->eeprom_name == NULL || mapdata == NULL)
+		return;
+
+	if (!strncmp(eb_info->eeprom_name, X11_FRONT_SENSOR_NAME,
+				strlen(X11_FRONT_SENSOR_NAME))) {
+				set_x11_front_sensor_name(e_ctrl, mapdata);
+				CDBG("x11 set front sensor name\n");
+				return;
+	}
+
+	if (!strncmp(eb_info->eeprom_name, X11_BACK_SENSOR_NAME,
+				strlen(X11_BACK_SENSOR_NAME)) ||
+				!strncmp(eb_info->eeprom_name, X11_BACK_3M2_SENSOR_NAME,
+				strlen(X11_BACK_3M2_SENSOR_NAME))) {
+		set_x11_back_sensor_name(e_ctrl, mapdata);
+	} else {
+		pr_err("x11 sensor name check failed\n");
+	}
+}
+
+int x7_get_back_sensor_name(char *sensor_name)
+{
+	if (x7_set_back_sensor_name) {
+		strcpy(sensor_name, x7_back_sensor_name);
+		return 0;
+	} else
+		return -EINVAL;
+}
+EXPORT_SYMBOL(x7_get_back_sensor_name);
+
+int x11_get_back_sensor_name(char *sensor_name)
+{
+	if (x11_set_back_sensor_name) {
+		strcpy(sensor_name, x11_back_sensor_name);
+		return 0;
+	} else
+		return -EINVAL;
+}
+EXPORT_SYMBOL(x11_get_back_sensor_name);
+
+int x7_get_front_sensor_name(char *sensor_name)
+{
+	if (x7_set_front_sensor_name) {
+		strcpy(sensor_name, x7_front_sensor_name);
+		return 0;
+	} else
+		return -EINVAL;
+}
+EXPORT_SYMBOL(x7_get_front_sensor_name);
+
+int x11_get_front_sensor_name(char *sensor_name)
+{
+	if (x11_set_front_sensor_name) {
+		strcpy(sensor_name, x11_front_sensor_name);
+		return 0;
+	} else
+		return -EINVAL;
+}
+EXPORT_SYMBOL(x11_get_front_sensor_name);
+#endif
 
 /**
   * msm_eeprom_match_crc - verify multiple regions using crc
@@ -279,6 +573,11 @@ static int read_eeprom_memory(struct msm_eeprom_ctrl_t *e_ctrl,
 {
 	int rc = 0;
 	int j;
+#ifdef CONFIG_MACH_LIBRA
+	int delay;
+	char out[4];
+	uint32_t temp;
+#endif
 	struct msm_eeprom_memory_map_t *emap = block->map;
 	struct msm_eeprom_board_info *eb_info;
 	uint8_t *memptr = block->mapdata;
@@ -299,12 +598,35 @@ static int read_eeprom_memory(struct msm_eeprom_ctrl_t *e_ctrl,
 				eb_info->i2c_slaveaddr);
 		}
 
+#ifdef CONFIG_MACH_LIBRA
+		if (emap[j].page.valid_size &&
+				eb_info->i2c_slaveaddr == EEPROM_ONSEMI_ADDR) {
+			temp = htonl(emap[j].page.data);
+			memcpy(out, (void *)&temp, sizeof(temp));
+			e_ctrl->i2c_client.addr_type = emap[j].page.addr_t;
+			rc = e_ctrl->i2c_client.i2c_func_tbl->i2c_write_seq(
+				&(e_ctrl->i2c_client), emap[j].page.addr, out,
+				sizeof(temp));
+				delay = emap[j].page.delay * 1000;
+				usleep_range(delay, delay + 100);
+			if (rc < 0) {
+				pr_err("%s: page write failed\n", __func__);
+				return rc;
+			}
+		} else if (emap[j].page.valid_size) {
+#else
 		if (emap[j].page.valid_size) {
+#endif
 			e_ctrl->i2c_client.addr_type = emap[j].page.addr_t;
 			rc = e_ctrl->i2c_client.i2c_func_tbl->i2c_write(
 				&(e_ctrl->i2c_client), emap[j].page.addr,
 				emap[j].page.data, emap[j].page.data_t);
+#ifdef CONFIG_MACH_LIBRA
+				delay = emap[j].page.delay * 1000;
+				usleep_range(delay, delay + 100);
+#else
 				msleep(emap[j].page.delay);
+#endif
 			if (rc < 0) {
 				pr_err("%s: page write failed\n", __func__);
 				return rc;
@@ -315,7 +637,12 @@ static int read_eeprom_memory(struct msm_eeprom_ctrl_t *e_ctrl,
 			rc = e_ctrl->i2c_client.i2c_func_tbl->i2c_write(
 				&(e_ctrl->i2c_client), emap[j].pageen.addr,
 				emap[j].pageen.data, emap[j].pageen.data_t);
+#ifdef CONFIG_MACH_LIBRA
+				delay = emap[j].pageen.delay;
+				usleep_range(delay, delay + 100);
+#else
 				msleep(emap[j].pageen.delay);
+#endif
 			if (rc < 0) {
 				pr_err("%s: page enable failed\n", __func__);
 				return rc;
@@ -326,7 +653,12 @@ static int read_eeprom_memory(struct msm_eeprom_ctrl_t *e_ctrl,
 			rc = e_ctrl->i2c_client.i2c_func_tbl->i2c_poll(
 				&(e_ctrl->i2c_client), emap[j].poll.addr,
 				emap[j].poll.data, emap[j].poll.data_t);
+#ifdef CONFIG_MACH_LIBRA
+				delay = emap[j].poll.delay;
+				usleep_range(delay, delay + 100);
+#else
 				msleep(emap[j].poll.delay);
+#endif
 			if (rc < 0) {
 				pr_err("%s: poll failed\n", __func__);
 				return rc;
@@ -355,6 +687,10 @@ static int read_eeprom_memory(struct msm_eeprom_ctrl_t *e_ctrl,
 			}
 		}
 	}
+#ifdef CONFIG_MACH_LIBRA
+	x7_set_sensor_name(e_ctrl, block->mapdata);
+	x11_set_sensor_name(e_ctrl, block->mapdata);
+#endif
 	return rc;
 }
 /**
@@ -891,6 +1227,10 @@ static int msm_eeprom_config32(struct msm_eeprom_ctrl_t *e_ctrl,
 	case CFG_EEPROM_READ_CAL_DATA:
 		CDBG("%s E CFG_EEPROM_READ_CAL_DATA\n", __func__);
 		rc = eeprom_config_read_cal_data32(e_ctrl, argp);
+		break;
+	case CFG_EEPROM_GET_MM_INFO:
+		CDBG("%s E CFG_EEPROM_GET_MM_INFO\n", __func__);
+		rc = msm_eeprom_get_cmm_data(e_ctrl, cdata);
 		break;
 	default:
 		break;
