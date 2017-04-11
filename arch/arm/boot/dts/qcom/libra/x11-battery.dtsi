@@ -27,7 +27,7 @@
 	/delete-property/ qcom,dc-psy-type;
 	/delete-property/ qcom,dc-psy-ma;
 
-	qcom,fastchg-current-ma = <2300>;
+	qcom,fastchg-current-ma = <2000>;
 	qcom,fastchg-current-comp = <900>;
 	qcom,float-voltage-mv = <4400>;
 	qcom,resume-delta-mv = <200>;
