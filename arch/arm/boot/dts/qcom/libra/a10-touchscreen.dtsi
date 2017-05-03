@@ -26,6 +26,16 @@
 		startup-delay-us = <10000>;
 		enable-active-high;
 	};
+
+	gen-vkeys {
+		compatible = "qcom,gen-vkeys";
+		label = "ft5x46";
+		qcom,disp-maxx = <1080>;
+		qcom,disp-maxy = <1920>;
+		qcom,panel-maxx = <1080>;
+		qcom,panel-maxy = <2080>;
+		qcom,key-codes = <139 102 158>;
+	};
 };
 
 &i2c_2 {
